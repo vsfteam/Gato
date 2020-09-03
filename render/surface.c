@@ -143,7 +143,7 @@ void surface_clip(surface_t *d, surface_t *s, int x, int y)
         {
             color_t *dc = &d->pixels[i * d->width + j];
             color_t *sc = &s->pixels[(i - y) * s->width + j - x];
-            if(dc->a)
+            if (dc->a)
                 *dc = *sc;
         }
     }
