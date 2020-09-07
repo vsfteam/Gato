@@ -24,3 +24,12 @@ surface_t *surface_image_load(char const *filename, int w, int h)
     }
     return s;
 }
+
+surface_t *surface_image_resize(surface_t *image, int w, int h)
+{
+    assert(image && image->pixels);
+    surface_t *s = surface_alloc(w, h);
+    assert(s);
+    stbir_resize_uint8(image->pixels, image->width, image->height, 0, s->pixels, w, h, 0, STBI_rgb_alpha);
+    return s;
+}

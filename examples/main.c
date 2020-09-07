@@ -9,6 +9,8 @@
 static SDL_Window *gWindow = NULL;
 static SDL_Surface *gSurface = NULL;
 
+static int mouse_x, mouse_y;
+
 static void frambuffer_init()
 {
     SDL_Init(SDL_INIT_VIDEO);
@@ -21,6 +23,13 @@ static void frambuffer_close()
     SDL_DestroyWindow(gWindow);
     SDL_Quit();
 }
+
+static void motion_get_xy(int *x, int *y)
+{
+    *x = mouse_x;
+    *y = mouse_y;
+}
+
 // #define PROFILE
 
 #ifdef PROFILE
@@ -76,6 +85,10 @@ int main()
             case SDL_QUIT:
                 exit(EXIT_SUCCESS);
                 break;
+            case SDL_MOUSEMOTION:
+                mouse_x = e.motion.x;
+                mouse_y = e.motion.y;
+                break;
             }
         }
 
@@ -83,7 +96,7 @@ int main()
         SDL_UpdateWindowSurface(gWindow);
         clock_gettime(CLOCK_MONOTONIC, &time2);
         unsigned long long mtime = (time2.tv_sec - time1.tv_sec) * 1000000 + (time2.tv_nsec - time1.tv_nsec) / 1000;
-        fps =  1000000.0f / mtime;
+        fps = 1000000.0f / mtime;
     }
     frambuffer_close();
 #endif
