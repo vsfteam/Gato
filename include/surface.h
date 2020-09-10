@@ -24,3 +24,4 @@ void surface_filter_blur(struct surface_t * s, int radius);
 void surface_mask(surface_t *d, surface_t *s, int x, int y);
 void surface_clip(surface_t *d, surface_t *s, int x, int y);
 void surface_blit_with_opacity(surface_t *d, surface_t *s, int x, int y, int a);
+void surface_pixel_set(surface_t *s, color_t color, int x, int y);

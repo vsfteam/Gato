@@ -13,79 +13,61 @@
 
 #define M_PI 3.14159265358979323846
 #define PI 3.14159265359f
+
+//https://www.jianshu.com/p/5198d8aa80c1
 #define KAPPA90 (0.5522847493f)
 #define fclampf(v, a, b) fminf(fmaxf(a, v), b)
 
 #define min(a, b) ({typeof(a) _amin = (a); typeof(b) _bmin = (b); (void)(&_amin == &_bmin); _amin < _bmin ? _amin : _bmin; })
 #define max(a, b) ({typeof(a) _amax = (a); typeof(b) _bmax = (b); (void)(&_amax == &_bmax); _amax > _bmax ? _amax : _bmax; })
 
-point_t constant_point_add_point(point_t p1, point_t p2, float ratio)
+static point_t constant_point_add_point(point_t p1, point_t p2, float ratio)
 {
 	return (point_t){(p1.x + p2.x) * ratio, (p1.y + p2.y) * ratio};
 }
 
-point_t point_sub_point(point_t p1, point_t p2)
+static point_t point_sub_point(point_t p1, point_t p2)
 {
 	return (point_t){(p1.x - p2.x), (p1.y - p2.y)};
 }
 
-point_t point_add_point(point_t p1, point_t p2)
+static point_t point_add_point(point_t p1, point_t p2)
 {
 	return (point_t){(p1.x + p2.x), (p1.y + p2.y)};
 }
 
-point_t point_min(point_t min, point_t p)
+static point_t point_min(point_t min, point_t p)
 {
 	return (point_t){fminf(min.x, p.x), fminf(min.y, p.y)};
 }
 
-point_t point_max(point_t min, point_t p)
+static point_t point_max(point_t min, point_t p)
 {
 	return (point_t){fmaxf(min.x, p.x), fmaxf(min.y, p.y)};
 }
 
-point_t unit_point(point_t p1)
+static point_t unit_point(point_t p1)
 {
 	float l = sqrtf(p1.x * p1.x + p1.y * p1.y);
 	return (point_t){(p1.x / l), (p1.y / l)};
 }
 
-float point_cross_point(point_t p1, point_t p2)
+static float point_cross_point(point_t p1, point_t p2)
 {
 	return p1.x * p2.y - p1.y * p2.x;
 }
 
-float point_dot_point(point_t p1, point_t p2)
+static float point_dot_point(point_t p1, point_t p2)
 {
 	return p1.x * p2.x + p1.y * p2.y;
 }
 
-point_t point_mul_factor(point_t p1, float factor)
+static point_t point_mul_factor(point_t p1, float factor)
 {
 	return (point_t){(p1.x * factor), (p1.y * factor)};
 }
 
-void set_color(surface_t *s, int x, int y, float alpha, color_t color)
-{
-	if (x >= 0 && x < s->width && y >= 0 && y < s->height)
-	{
-		color.a = alpha * color.a;
-		color_t *c = s->pixels + y * s->width + x;
-		blend(c, &color);
-	}
-}
-
-void alphablend(surface_t *s, int x, int y, float alpha, color_t color)
-{
-	if (x >= 0 && x < s->width && y >= 0 && y < s->height)
-	{
-		alpha = alpha * color.a / 255.0;
-		color_t *c = s->pixels + y * s->width + x;
-		*c = (color_t){c->b * (1 - alpha) + color.b * alpha, c->g * (1 - alpha) + color.g * alpha, c->r * (1 - alpha) + color.r * alpha, 255};
-	}
-}
-
-float capsuleSDF(point_t p, point_t a, point_t b, float r)
+static float capsule_sdf(point_t p, point_t a, point_t b, float r)
 {
 	point_t pa = point_sub_point(p, a);
 	point_t ba = point_sub_point(b, a);
@@ -94,25 +76,19 @@ float capsuleSDF(point_t p, point_t a, point_t b, float r)
 	return sqrtf(dx * dx + dy * dy) - r;
 }
 
-void lineSDFAABB(surface_t *s, float ax, float ay, float bx, float by, color_t color, float r)
+static int draw_sdf_line(surface_t *s, point_t p1, point_t p2, color_t color, float thickness)
 {
-	int x0 = (int)floorf(fminf(ax, bx) - r);
-	int x1 = (int)ceilf(fmaxf(ax, bx) + r);
-	int y0 = (int)floorf(fminf(ay, by) - r);
-	int y1 = (int)ceilf(fmaxf(ay, by) + r);
+	int r = thickness / 2;
+	int x0 = (int)floorf(fminf(p1.x, p2.x) - r);
+	int x1 = (int)ceilf(fmaxf(p1.x, p2.x) + r);
+	int y0 = (int)floorf(fminf(p1.y, p2.y) - r);
+	int y1 = (int)ceilf(fmaxf(p1.y, p2.y) + r);
 	for (int y = y0; y <= y1; y++)
 		for (int x = x0; x <= x1; x++)
 		{
-			// alphablend(s, x, y, fmaxf(fminf(0.5f - capsuleSDF((point_t){x, y}, (point_t){ax, ay}, (point_t){bx, by}, r), 1.0f), 0.0f), color);
-
-			float a = fmaxf(fminf(0.5f - capsuleSDF((point_t){x, y}, (point_t){ax, ay}, (point_t){bx, by}, r), 1.0f), 0.0f);
-			set_color(s, x, y, a, color);
+			float a = fmaxf(fminf(0.5f - capsule_sdf((point_t){x, y}, (point_t){p1.x, p1.y}, (point_t){p2.x, p2.y}, r), 1.0f), 0.0f);
+			surface_pixel_set(s, (color_t){color.b, color.g, color.r, color.a * a}, x, y);
 		}
-}
-
-int draw_sdf_line(surface_t *s, point_t p1, point_t p2, color_t color, float thickness)
-{
-	lineSDFAABB(s, p1.x, p1.y, p2.x, p2.y, color, thickness / 2);
 }
 
 static int cmp_edge(const void *restrict p, const void *restrict q)
@@ -126,16 +102,16 @@ static int cmp_edge(const void *restrict p, const void *restrict q)
 	return 0;
 }
 
-struct active_edge_t
+typedef struct active_edge_t
 {
 	float x;
 	int dir;
-};
+} active_edge_t;
 
 static int cmp_info(const void *restrict p, const void *restrict q)
 {
-	struct active_edge_t *restrict a = (struct active_edge_t *)p;
-	struct active_edge_t *restrict b = (struct active_edge_t *)q;
+	active_edge_t *restrict a = (active_edge_t *)p;
+	active_edge_t *restrict b = (active_edge_t *)q;
 
 	if (a->x != b->x)
 	{
@@ -199,11 +175,13 @@ static void rasterize_sorted_edges(context_t *ctx, edge_t es[], int elen, color_
 {
 
 	//FIXME: dynamic alloc
-	struct active_edge_t a[1000] = {0};
+	struct active_edge_t *a = malloc(sizeof(active_edge_t) * 100);
+	int na_edge = 100;
+
 	int width = ctx->s->width;
 	int *scanline = malloc(sizeof(int) * width);
 
-	assert(scanline);
+	assert(a && scanline);
 	qsort(es, elen, sizeof(edge_t), cmp_edge);
 
 	for (int y = 0; y < ctx->s->height; y++)
@@ -228,6 +206,12 @@ static void rasterize_sorted_edges(context_t *ctx, edge_t es[], int elen, color_
 						// draw_sdf_line(ctx->s, point_sub_point(e[i].start,ctx->origin), point_sub_point(e[i].end,ctx->origin), RGB(0xffff00), 3);
 
 						count++;
+
+						if (count >= na_edge)
+						{
+							na_edge *=2;
+							a = realloc(a, sizeof(active_edge_t) * na_edge);
+						}
 					}
 				}
 				else
@@ -278,34 +262,8 @@ static void rasterize_sorted_edges(context_t *ctx, edge_t es[], int elen, color_
 		for (int x = 0; x < width; x++)
 		{
 			color_t *d = &dl[x];
-			//TODO:
-#if 1
 			c.a = idiv255(a * scanline[x]);
 			blend(d, &c);
-#else
-			if (scanline[x] == 255)
-			{
-				color_t c = color;
-				c.a = 255;
-				blend(d, &c);
-				d->a = color.a;
-			}
-			else if (scanline[x] > 0)
-			{
-				color_t c = color;
-				c.a = c.a * scanline[x] / 255.0;
-
-				if (d->a > 0)
-				{
-					blend(d, &c);
-					d->a = color.a;
-				}
-				else
-				{
-					blend(d, &c);
-				}
-			}
-#endif
 		}
 	}
 
@@ -402,15 +360,7 @@ static void context_surface_alloc(context_t *ctx)
 	ctx->min.y = floorf(ctx->min.y) - 1;
 	ctx->max.x = ceilf(ctx->max.x) + 1;
 	ctx->max.y = ceilf(ctx->max.y) + 1;
-	//TODO:
-	// ctx->min = point_max(ctx->min, (point_t){0, 0});
-	// ctx->max = point_min(ctx->max, (point_t){ctx->base->width - 1, ctx->base->height - 1});
 
-	// if (ctx->min.x >= ctx->max.x || ctx->min.y >= ctx->max.y)
-	// {
-	// 	assert(0);
-	// 	return;
-	// }
 	if (ctx->s)
 	{
 		int x = ctx->origin.x - ctx->min.x;
@@ -587,29 +537,12 @@ static void arc_tobez(float a1, float da, point_t *v1, point_t *v2, point_t *h2)
 {
 	point_t *h1 = &(point_t){cosf(a1), sinf(a1)}, t1, t2;
 	float h = 0;
-	// da = -da;
 	float a = M_PI / 2;
-	// if (da == M_PI / 2)
-	// {
-	//     *h2 = (point_t){-h1->y, h1->x};
-	//     h = KAPPA90;
-	//     t1 = *h2;
-	//     t2 = *h1;
-	// }
-	// else if (da == - M_PI / 2)
-	// {
-	//     *h2 = (point_t){-h1->y, h1->x};
-	//     h = KAPPA90;
-	//     t1 = *h2;
-	//     t2 = *h1;
-	// }
-	// else
-	{
-		*h2 = (point_t){cosf(da) * h1->x - sinf(da) * h1->y, sinf(da) * h1->x + cosf(da) * h1->y};
-		h = 4.0 * tanf(da / 4) / 3.0;
-		t1 = (point_t){-sinf(a) * h1->y, sinf(a) * h1->x};
-		t2 = (point_t){sinf(a) * h2->y, -sinf(a) * h2->x};
-	}
+
+	*h2 = (point_t){cosf(da) * h1->x - sinf(da) * h1->y, sinf(da) * h1->x + cosf(da) * h1->y};
+	h = 4.0 * tanf(da / 4) / 3.0;
+	t1 = (point_t){-sinf(a) * h1->y, sinf(a) * h1->x};
+	t2 = (point_t){sinf(a) * h2->y, -sinf(a) * h2->x};
 
 	*v1 = point_add_point(*h1, point_mul_factor(t1, h));
 	*v2 = point_add_point(*h2, point_mul_factor(t2, h));
@@ -669,14 +602,11 @@ static void arc_to(context_t *ctx, float rx, float ry, float rotation, int large
 	point_t end = arc2unit_c(rx, ry, rotation, point_sub_point(p1, c));
 
 	float a0 = acosf(fclampf(point_dot_point((point_t){1, 0}, start), -1.0, 1.0));
-
-	// float a0 = atan2f(start.y, start.x);
 	a0 = point_cross_point((point_t){1, 0}, start) < 0 ? -a0 : a0;
 	float da = acosf(fclampf(point_dot_point(start, end), -1.0, 1.0));
 	da = point_cross_point(start, end) < 0 ? -da : da;
 	da = fmodf(da, 2 * M_PI);
 
-	// da = 2 * M_PI + da;
 	if (sweep)
 	{
 		if (da < 0)
@@ -726,7 +656,7 @@ static void svg_to(context_t *ctx, const char *buf, svg_style_t style)
 	point_t pos;
 	point_t mirror;
 	svg_parser_t *parser = &(svg_parser_t){0};
-	// const char *buf = "M10,315L110,215A30,50,0,0,1,162.55,162.45L172.55,152.45A30,50,-45,0,1,215.1,109.9L315,10";
+
 	svg_parser_init(parser, buf);
 	svg_cmd_t cmd;
 
@@ -844,15 +774,6 @@ static void svg_to(context_t *ctx, const char *buf, svg_style_t style)
 		default:
 			break;
 		}
-
-		// if (cmd.cmd == 'c')
-		// {
-		// 	printf("c %f %f %f %f %f %f\n", cmd.c.dx1, cmd.c.dy1, cmd.c.dx2, cmd.c.dy2, cmd.c.dx, cmd.c.dy);
-		// }
-		// else
-		// {
-		// 	printf("%c \n", cmd.cmd);
-		// }
 
 		if (cmd.cmd != 'C' && cmd.cmd != 'c' && cmd.cmd != 'S' && cmd.cmd != 's' && cmd.cmd != 'Q' && cmd.cmd != 'q' && cmd.cmd != 'T' && cmd.cmd != 't')
 		{
@@ -1123,44 +1044,6 @@ static void add_path(context_t *ctx, int s, int ne_ps)
 	}
 }
 
-static void stroke(context_t *ctx)
-{
-	for (int i = 1, begin = 0; i < ctx->ne_ps; i++)
-	{
-		if (ctx->e_ps[i % ctx->ne_ps].pp_type == POINT_PATH_BEGIN)
-		{
-			prepare_stroke(ctx, begin, i - begin);
-			expand_stroke(ctx, begin, i - begin);
-			begin = i;
-		}
-		else if (i == ctx->ne_ps - 1)
-		{
-			prepare_stroke(ctx, begin, i - begin + 1);
-			expand_stroke(ctx, begin, i - begin + 1);
-		}
-	}
-	rasterize_sorted_edges(ctx, ctx->es, ctx->nes, ctx->stroke_color);
-	ctx->nes = 0;
-}
-
-static void fill(context_t *ctx)
-{
-	for (int i = 1, begin = 0; i < ctx->ne_ps; i++)
-	{
-		if (ctx->e_ps[i % ctx->ne_ps].pp_type == POINT_PATH_BEGIN)
-		{
-			add_path(ctx, begin, i - begin);
-			begin = i;
-		}
-		else if (i == ctx->ne_ps - 1)
-		{
-			add_path(ctx, begin, i - begin + 1);
-		}
-	}
-
-	qsort(ctx->es, ctx->nes, sizeof(edge_t), cmp_edge);
-}
-
 static void render(context_t *ctx, float x, float y, style_t style)
 {
 	if (style.fill_color.a != 0)
@@ -1214,7 +1097,6 @@ static void render(context_t *ctx, float x, float y, style_t style)
 		//TODO: How to calc shadow's range
 		float range = style.shadow[i].blur * 2;
 		surface_t *shadow = surface_clone(ctx->s, range, range, ctx->s->width + 2 * range, ctx->s->height + 2 * range);
-		// surface_t *shadow = surface_copy(ctx->s);
 		surface_mono(shadow, style.shadow[i].color);
 		surface_filter_blur(shadow, style.shadow[i].blur);
 		surface_blit(ctx->base, shadow, ctx->origin.x - range + style.shadow[i].shadow_h, ctx->origin.y - range + style.shadow[i].shadow_v);
@@ -1513,7 +1395,7 @@ void draw_text(surface_t *base, int x, int y, char *c, float size, color_t color
 		.translate_y = y + 1521 * scale,
 		.mirror_y = 1,
 	};
-	//FIXME:0.8
+
 	for (int i = 0; i < strlen(c); i++, style.translate_x += 1126 * scale)
 	{
 		svg_to(ctx, consolas_font[c[i]], style);

@@ -87,13 +87,13 @@ static void sample(surface_t *base, float fps)
 	float right = W / 2 + 60 * N / 2.0;
 	static float A = 0;
 
-	if (m_x < left || m_x > right)
+	if (m_x < left || m_x > right || m_y < H - 60 || m_y > H)
 	{
-		A = fclampf(A - 7, 0, 60);
+		A = fclampf(A - 8 * 40.0 / fps, 0, 60);
 	}
 	else
 	{
-		A = fclampf(A + 7, 0, 60);
+		A = fclampf(A + 8 * 40.0 / fps, 0, 60);
 	}
 
 	float center = f(m_x, m_x, A);

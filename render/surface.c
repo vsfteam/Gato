@@ -72,6 +72,15 @@ void surface_clear(surface_t *s, color_t c, int x, int y, int w, int h)
     }
 }
 
+void surface_pixel_set(surface_t *s, color_t color, int x, int y)
+{
+    if (x >= 0 && x < s->width && y >= 0 && y < s->height)
+    {
+        color_t *c = s->pixels + y * s->width + x;
+        blend(c, &color);
+    }
+}
+
 surface_t *surface_copy(surface_t *s)
 {
     surface_t *d = surface_alloc(s->width, s->height);
