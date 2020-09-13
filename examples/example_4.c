@@ -37,4 +37,4 @@ static void sample(surface_t *base, float fps)
              1024, 1024, 75, 75, 766, 766, RGB(0x777777));
 }
 
-#include "main.c"
+#include "main.h"

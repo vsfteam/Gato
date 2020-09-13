@@ -11,4 +11,4 @@ static void sample(surface_t *base, float fps)
 	draw_text(base, 0, 0, "Hello World!", 6, RGB(0x000000));
 }
 
-#include "main.c"
+#include "main.h"

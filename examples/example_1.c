@@ -57,4 +57,4 @@ static void sample(surface_t *base, float fps)
              });
 }
 
-#include "main.c"
+#include "main.h"

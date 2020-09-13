@@ -209,7 +209,7 @@ static void rasterize_sorted_edges(context_t *ctx, edge_t es[], int elen, color_
 
 						if (count >= na_edge)
 						{
-							na_edge *=2;
+							na_edge *= 2;
 							a = realloc(a, sizeof(active_edge_t) * na_edge);
 						}
 					}
@@ -277,7 +277,6 @@ static void rasterize_sorted_edges(context_t *ctx, edge_t es[], int elen, color_
 static void context_init(context_t *ctx, surface_t *base)
 {
 	*ctx = (context_t){0};
-	ctx->stroke_color = ctx->fill_color = (color_t){0, 0, 0, 255};
 	ctx->base = base;
 	ctx->min.y = ctx->min.x = 1000000;
 	ctx->max.y = ctx->max.x = -1000000;
@@ -304,8 +303,6 @@ static void context_reset(context_t *ctx)
 static void context_clear(context_t *ctx)
 {
 	ctx->nes = 0;
-	ctx->min.y = ctx->min.x = 1000000;
-	ctx->max.y = ctx->max.x = -1000000;
 }
 
 static void context_exit(context_t *ctx)
@@ -326,17 +323,7 @@ static void context_exit(context_t *ctx)
 
 static void context_line_width_set(context_t *ctx, float line_width)
 {
-	ctx->thickness = line_width;
-}
-
-static void context_fill_color_set(context_t *ctx, color_t color)
-{
-	ctx->fill_color = color;
-}
-
-static void context_stroke_color_set(context_t *ctx, color_t color)
-{
-	ctx->stroke_color = color;
+	ctx->width = line_width;
 }
 
 static void context_cap_style_set(context_t *ctx, enum line_cap_t cap)
@@ -356,10 +343,11 @@ static void context_fill_rule_set(context_t *ctx, enum fill_rule_t rule)
 
 static void context_surface_alloc(context_t *ctx)
 {
-	ctx->min.x = floorf(ctx->min.x) - 1;
-	ctx->min.y = floorf(ctx->min.y) - 1;
-	ctx->max.x = ceilf(ctx->max.x) + 1;
-	ctx->max.y = ceilf(ctx->max.y) + 1;
+
+	ctx->min.x = floorf(ctx->min.x);
+	ctx->min.y = floorf(ctx->min.y);
+	ctx->max.x = ceilf(ctx->max.x);
+	ctx->max.y = ceilf(ctx->max.y);
 
 	if (ctx->s)
 	{
@@ -382,6 +370,8 @@ static void context_surface_alloc(context_t *ctx)
 static void context_surface_free(context_t *ctx)
 {
 	context_clear(ctx);
+	ctx->origin.y = ctx->origin.x = 0;
+
 	if (ctx->s)
 	{
 		surface_free(ctx->s);
@@ -850,7 +840,7 @@ static void bevel_join(context_t *ctx, expand_point_t *ep0, expand_point_t *ep1)
 static void round_join(context_t *ctx, expand_point_t *ep0, expand_point_t *ep1)
 {
 	float da = acosf(point_dot_point(ep0->h, ep1->h));
-	float h = (ctx->thickness / 2.0) * (4.0 * tanf(da / 4) / 3.0);
+	float h = (ctx->width / 2.0) * (4.0 * tanf(da / 4) / 3.0);
 	point_t h1, h2;
 
 	add_edge(ctx, ep0->p2, ep1->p1);
@@ -889,7 +879,7 @@ static void butt_cap(context_t *ctx, expand_point_t *ep0, expand_point_t *ep1, i
 static void square_cap(context_t *ctx, expand_point_t *ep0, expand_point_t *ep1, int head)
 {
 	point_t h1, h2;
-	float w = (ctx->thickness / 2.0);
+	float w = (ctx->width / 2.0);
 
 	if (head)
 	{
@@ -916,7 +906,7 @@ static void square_cap(context_t *ctx, expand_point_t *ep0, expand_point_t *ep1,
 static void round_cap(context_t *ctx, expand_point_t *ep0, expand_point_t *ep1, int head)
 {
 	point_t h[5];
-	float w = (ctx->thickness / 2.0);
+	float w = (ctx->width / 2.0);
 
 	if (head)
 	{
@@ -963,7 +953,7 @@ static void prepare_stroke(context_t *ctx, int s, int ne_ps)
 	{
 		expand_point_t *e_p0 = &e_ps[i % ne_ps];
 		expand_point_t *e_p1 = &e_ps[(i + 1) % ne_ps];
-		float w = ctx->thickness / 2.0;
+		float w = ctx->width / 2.0;
 
 		point_t p = e_p0->p;
 		point_t v1 = e_p0->v;
@@ -1044,89 +1034,193 @@ static void add_path(context_t *ctx, int s, int ne_ps)
 	}
 }
 
+static int context_fill(context_t *ctx, color_t color)
+{
+	for (int i = 1, begin = 0; i < ctx->ne_ps; i++)
+	{
+		if (ctx->e_ps[i % ctx->ne_ps].pp_type == POINT_PATH_BEGIN)
+		{
+			add_path(ctx, begin, i - begin);
+			begin = i;
+		}
+		else if (i == ctx->ne_ps - 1)
+		{
+			add_path(ctx, begin, i - begin + 1);
+		}
+	}
+
+	context_surface_alloc(ctx);
+	rasterize_sorted_edges(ctx, ctx->es, ctx->nes, color);
+	context_clear(ctx);
+	return 1;
+}
+
+static int context_stroke(context_t *ctx, color_t color, float width)
+{
+	if (width == 0.0)
+		return 0;
+
+	context_line_width_set(ctx, width);
+
+	for (int i = 1, begin = 0; i < ctx->ne_ps; i++)
+	{
+		if (ctx->e_ps[i % ctx->ne_ps].pp_type == POINT_PATH_BEGIN)
+		{
+			prepare_stroke(ctx, begin, i - begin);
+			expand_stroke(ctx, begin, i - begin);
+			begin = i;
+		}
+		else if (i == ctx->ne_ps - 1)
+		{
+			prepare_stroke(ctx, begin, i - begin + 1);
+			expand_stroke(ctx, begin, i - begin + 1);
+		}
+	}
+
+	context_surface_alloc(ctx);
+	rasterize_sorted_edges(ctx, ctx->es, ctx->nes, color);
+	context_clear(ctx);
+	return 1;
+}
+
 static void render(context_t *ctx, float x, float y, style_t style)
 {
-	if (style.fill_color.a != 0)
+	color_t fill_color = style.fill_color;
+	color_t stroke_color = style.stroke_color;
+	fill_color.a = 255;
+	stroke_color.a = 255;
+	surface_t *shadow = NULL;
+	surface_t *bg = NULL;
+	surface_t *copy_fill = NULL;
+	surface_t *copy_stroke = NULL;
+	surface_t *shape = NULL;
+	point_t origin_shadow = {0};
+	point_t origin_stroke = {0};
+	point_t origin_fill = {0};
+	point_t origin_shape = {0};
+
+	if (context_stroke(ctx, stroke_color, style.stroke_width))
 	{
-		context_fill_color_set(ctx, style.fill_color);
-
-		for (int i = 1, begin = 0; i < ctx->ne_ps; i++)
-		{
-			if (ctx->e_ps[i % ctx->ne_ps].pp_type == POINT_PATH_BEGIN)
-			{
-				add_path(ctx, begin, i - begin);
-				begin = i;
-			}
-			else if (i == ctx->ne_ps - 1)
-			{
-				add_path(ctx, begin, i - begin + 1);
-			}
-		}
-
-		context_surface_alloc(ctx);
-		rasterize_sorted_edges(ctx, ctx->es, ctx->nes, ctx->fill_color);
-		context_clear(ctx);
+		copy_stroke = surface_copy(ctx->s);
+		origin_stroke = ctx->origin;
+		surface_clear(ctx->s, ARGB(0), 0, 0, ctx->s->width, ctx->s->height);
 	}
 
-	if (style.stroke_width != 0.0 && style.stroke_color.a != 0)
+	if (context_fill(ctx, fill_color))
 	{
-		context_line_width_set(ctx, style.stroke_width);
-		context_stroke_color_set(ctx, style.stroke_color);
-
-		for (int i = 1, begin = 0; i < ctx->ne_ps; i++)
-		{
-			if (ctx->e_ps[i % ctx->ne_ps].pp_type == POINT_PATH_BEGIN)
-			{
-				prepare_stroke(ctx, begin, i - begin);
-				expand_stroke(ctx, begin, i - begin);
-				begin = i;
-			}
-			else if (i == ctx->ne_ps - 1)
-			{
-				prepare_stroke(ctx, begin, i - begin + 1);
-				expand_stroke(ctx, begin, i - begin + 1);
-			}
-		}
-
-		context_surface_alloc(ctx);
-		rasterize_sorted_edges(ctx, ctx->es, ctx->nes, ctx->stroke_color);
+		copy_fill = surface_copy(ctx->s);
+		origin_fill = ctx->origin;
 	}
 
-	for (int i = 0; i < style.n_shadow; i++)
+	if (copy_stroke && copy_fill)
 	{
-		//TODO: How to calc shadow's range
-		float range = style.shadow[i].blur * 2;
-		surface_t *shadow = surface_clone(ctx->s, range, range, ctx->s->width + 2 * range, ctx->s->height + 2 * range);
-		surface_mono(shadow, style.shadow[i].color);
-		surface_filter_blur(shadow, style.shadow[i].blur);
-		surface_blit(ctx->base, shadow, ctx->origin.x - range + style.shadow[i].shadow_h, ctx->origin.y - range + style.shadow[i].shadow_v);
-		surface_free(shadow);
+		shape = surface_copy(copy_stroke);
+		surface_mono(shape, fill_color);
+		surface_blit(copy_fill, shape, 0, 0);
+		surface_cover(shape, copy_fill, 0, 0);
+		origin_shape = origin_fill;
+	}
+	else if (copy_fill)
+	{
+		shape = surface_copy(copy_fill);
+		origin_shape = origin_fill;
+	}
+	else if (copy_stroke)
+	{
+		shape = surface_copy(copy_stroke);
+		origin_shape = origin_stroke;
 	}
 
-	if (ctx->s)
+	if (copy_stroke || copy_fill)
 	{
-		if (style.clip_image != 0)
+		surface_t *base = NULL;
+		point_t origin = {0};
+		//TODO: No set fill color, still show image
+		if (copy_fill && style.clip_image != 0)
 		{
-			surface_mask(ctx->s, style.clip_image, ceilf(x - ctx->origin.x), ceilf(y - ctx->origin.y));
+			surface_mask(copy_fill, style.clip_image, ceilf(x - ctx->origin.x), ceilf(y - ctx->origin.y));
 		}
-		//TODO: conflict with clip image, shadow
-		if (style.background_blur != 0.0f)
+
+		if (style.background_blur != 0.0f) //TODO: conflict with clip image, shadow
 		{
-			surface_t *cp = surface_copy(ctx->s);
-			surface_t *cp1 = surface_copy(ctx->s);
-			surface_cover(cp, ctx->base, ceilf(-ctx->origin.x), ceilf(-ctx->origin.y));
+			bg = surface_copy(shape);
+			surface_t *cp = surface_copy(shape);
+			surface_cover(cp, ctx->base, ceilf(-origin_shape.x), ceilf(-origin_shape.y));
 			surface_filter_blur(cp, style.background_blur);
-			surface_clip(ctx->s, cp, 0, 0);
-			surface_blit(ctx->s, cp1, 0, 0);
+			surface_mask(bg, cp, 0, 0);
 			surface_free(cp);
-			surface_free(cp1);
 		}
-		if (style.transparency)
-			surface_blit_with_opacity(ctx->base, ctx->s, ctx->origin.x, ctx->origin.y, 255 - style.transparency);
+
+		if (style.n_shadow > 0)
+		{
+			float max_range = 0;
+			for (int i = 0; i < style.n_shadow; i++)
+			{
+				max_range = fmaxf(max_range, style.shadow[i].blur * 2);
+			}
+			origin_shadow = point_add_point(origin_shape, (point_t){-max_range, -max_range});
+
+			shadow = surface_alloc(ctx->s->width + 2 * max_range, ctx->s->height + 2 * max_range);
+
+			for (int i = 0; i < style.n_shadow; i++)
+			{
+				//TODO: How to calc shadow's range
+				float range = style.shadow[i].blur * 2;
+				surface_t *s = surface_clone(shape, range, range, shape->width + 2 * range, shape->height + 2 * range);
+				surface_mono(s, style.shadow[i].color);
+				surface_filter_blur(s, style.shadow[i].blur);
+				surface_blit(shadow, s, max_range - range + style.shadow[i].shadow_h, max_range - range + style.shadow[i].shadow_v);
+				surface_free(s);
+			}
+		}
+
+		if (copy_fill)
+			surface_filter_opacity(copy_fill, style.fill_color.a);
+		if (copy_stroke)
+			surface_filter_opacity(copy_stroke, style.stroke_color.a);
+
+		if (shadow)
+			base = shadow;
+		else if (bg)
+			base = bg;
+		else if (copy_fill)
+			base = copy_fill;
+		else if (copy_stroke)
+			base = copy_fill;
+
+		if (shadow)
+			origin = origin_shadow;
 		else
-			surface_blit(ctx->base, ctx->s, ctx->origin.x, ctx->origin.y);
+			origin = origin_shape;
+
+		if (bg && (bg != base))
+			surface_blit(base, bg, origin_shape.x - origin.x, origin_shape.y - origin.y);
+
+		if (shadow && (!bg))
+		{
+			surface_cover_with_opacity(base, copy_fill, origin_shape.x - origin.x, origin_shape.y - origin.y, style.fill_color.a);
+		}
+		else if (copy_fill && (copy_fill != base))
+		{
+			surface_blit(base, copy_fill, origin_shape.x - origin.x, origin_shape.y - origin.y);
+		}
+
+		if (copy_stroke)
+			surface_blit(base, copy_stroke, origin_shape.x - origin.x, origin_shape.y - origin.y);
+		surface_blit(ctx->base, base, origin.x, origin.y);
 	}
 	context_surface_free(ctx);
+
+	if (copy_stroke)
+		surface_free(copy_stroke);
+	if (copy_fill)
+		surface_free(copy_fill);
+	if (shape)
+		surface_free(shape);
+	if (bg)
+		surface_free(bg);
+	if (shadow)
+		surface_free(shadow);
 }
 
 void draw_line(surface_t *base, point_t p0, point_t p1, style_t style)
@@ -1365,7 +1459,6 @@ void draw_svg(surface_t *base, char *path, float vb_w, float vb_h, float w, floa
 	context_init(ctx, base);
 	context_cap_style_set(ctx, CAP_BUTT);
 	context_join_style_set(ctx, JOIN_BEVEL);
-	context_fill_color_set(ctx, color);
 
 	svg_style_t style = (svg_style_t){
 		scale : w / vb_w,
@@ -1383,7 +1476,6 @@ void draw_text(surface_t *base, int x, int y, char *c, float size, color_t color
 {
 	context_t *ctx = &(context_t){0};
 	context_init(ctx, base);
-	context_fill_color_set(ctx, color);
 	context_cap_style_set(ctx, CAP_BUTT);
 	context_join_style_set(ctx, JOIN_BEVEL);
 

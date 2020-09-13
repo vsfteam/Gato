@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <math.h>
+#include <string.h>
 #include "surface.h"
 
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -111,11 +112,11 @@ void surface_blit(surface_t *d, surface_t *s, int x, int y)
     for (int i = ys; i <= ye; i++)
     {
         color_t *dl = d->pixels + i * d->width;
-        color_t *sl = s->pixels + (i - y) * s->width;
+        color_t *sl = s->pixels + (i - y) * s->width - x;
 
         for (int j = xs; j <= xe; j++)
         {
-            blend(&dl[j], &sl[j - x]);
+            blend(&dl[j], &sl[j]);
         }
     }
 }
@@ -215,9 +216,58 @@ void surface_cover(surface_t *d, surface_t *s, int x, int y)
     int ye = clamp(y + s->height - 1, 0, d->height - 1);
     for (int i = ys; i <= ye; i++)
     {
+        color_t *dc = d->pixels + i * d->width;
+        color_t *sc = s->pixels + (i - y) * s->width - x;
+
         for (int j = xs; j <= xe; j++)
         {
-            d->pixels[i * d->width + j] = s->pixels[(i - y) * s->width + j - x];
+            dc[j] = sc[j];
+        }
+    }
+}
+
+void surface_cover_with_opacity(surface_t *d, surface_t *s, int x, int y, int a)
+{
+    int xs = clamp(x, 0, d->width - 1);
+    int xe = clamp(x + s->width - 1, 0, d->width - 1);
+    int ys = clamp(y, 0, d->height - 1);
+    int ye = clamp(y + s->height - 1, 0, d->height - 1);
+
+    float fa = a / 255.0;
+    for (int i = ys; i <= ye; i++)
+    {
+        color_t *dc = d->pixels + i * d->width;
+        color_t *sc = s->pixels + (i - y) * s->width - x;
+
+        for (int j = xs; j <= xe; j++)
+        {
+            int a1 = sc[j].a;
+            if (a1 >= a)
+            {
+                dc[j] = sc[j];
+            }
+            else if (a1 > 0)
+            {
+                dc[j] = sc[j];
+                // TODO:
+                // blend(dc + j, sc + j);
+                // FIXME:
+                // draw_rectage(base, 10, 10, 280, 280, 20, (style_t){
+                //     fill_color : ARGB(0x2FFFFFFF),
+                //     border_radius : {1, 1, 1, 1},
+                //     stroke_color : ARGB(0x2FB2B2B2),
+                //     stroke_width : 5,
+                // });
+                // dc[j].a = fclampf(dc[j].a,0 ,a);
+                // float f1 = ((float)a1) / a;
+                // float da = dc[j].a;
+                // float f2 = da + (a1 - da) * f1;
+                // float f3 = da * (1 - f1) / f2;
+                // dc[j].r += (sc[j].r - dc[j].r) * f3;
+                // dc[j].g += (sc[j].g - dc[j].g) * f3;
+                // dc[j].b += (sc[j].b - dc[j].b) * f3;
+                // dc[j].a = f2;
+            }
         }
     }
 }
@@ -314,4 +364,17 @@ void surface_filter_blur(struct surface_t *s, int radius)
 
     if (radius > 0)
         expblur(pixels, width, height, 4, radius);
+}
+
+void surface_filter_opacity(struct surface_t *s, int a)
+{
+    float fa = a / 255.0;
+    for (int i = 0; i < s->height; i++)
+    {
+        for (int j = 0; j < s->width; j++)
+        {
+            color_t *c = &s->pixels[i * s->width + j];
+            c->a = c->a * fa;
+        }
+    }
 }
