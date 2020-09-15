@@ -33,7 +33,7 @@ surface_t *image[3] = {0};
 int sample(surface_t *base, float fps)
 {
     surface_clear(base, RGB(0xBCC4D0), 0, 0, base->width, base->height);
-	printf("\rfps:%f", fps);
+	printf("fps:%f\n", fps);
 
     int x = 5, y = 5;
 

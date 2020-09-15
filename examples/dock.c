@@ -66,7 +66,7 @@ static float f(float x, float b, float A)
 
 static void sample(surface_t *base, float fps)
 {
-	printf("\rfps:%f", fps);
+	printf("fps:%f\n", fps);
 	surface_clear(base, RGB(0xFFFFFF), 0, 0, base->width, base->height);
 	int m_x, m_y;
 	float size[N] = {0};
