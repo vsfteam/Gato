@@ -123,6 +123,12 @@ void surface_blit(surface_t *d, surface_t *s, int x, int y)
 
 void surface_blit_with_opacity(surface_t *d, surface_t *s, int x, int y, int a)
 {
+    if (a == 255)
+    {
+        surface_blit(d, s, x, y);
+        return;
+    }
+
     int xs = clamp(x, 0, d->width - 1);
     int xe = clamp(x + s->width - 1, 0, d->width - 1);
     int ys = clamp(y, 0, d->height - 1);
@@ -226,14 +232,13 @@ void surface_cover(surface_t *d, surface_t *s, int x, int y)
     }
 }
 
-void surface_cover_with_opacity(surface_t *d, surface_t *s, int x, int y, int a)
+void surface_composite_out(surface_t *d, surface_t *s, int x, int y)
 {
     int xs = clamp(x, 0, d->width - 1);
     int xe = clamp(x + s->width - 1, 0, d->width - 1);
     int ys = clamp(y, 0, d->height - 1);
     int ye = clamp(y + s->height - 1, 0, d->height - 1);
 
-    float fa = a / 255.0;
     for (int i = ys; i <= ye; i++)
     {
         color_t *dc = d->pixels + i * d->width;
@@ -241,33 +246,7 @@ void surface_cover_with_opacity(surface_t *d, surface_t *s, int x, int y, int a)
 
         for (int j = xs; j <= xe; j++)
         {
-            int a1 = sc[j].a;
-            if (a1 >= a)
-            {
-                dc[j] = sc[j];
-            }
-            else if (a1 > 0)
-            {
-                dc[j] = sc[j];
-                // TODO:
-                // blend(dc + j, sc + j);
-                // FIXME:
-                // draw_rectage(base, 10, 10, 280, 280, 20, (style_t){
-                //     fill_color : ARGB(0x2FFFFFFF),
-                //     border_radius : {1, 1, 1, 1},
-                //     stroke_color : ARGB(0x2FB2B2B2),
-                //     stroke_width : 5,
-                // });
-                // dc[j].a = fclampf(dc[j].a,0 ,a);
-                // float f1 = ((float)a1) / a;
-                // float da = dc[j].a;
-                // float f2 = da + (a1 - da) * f1;
-                // float f3 = da * (1 - f1) / f2;
-                // dc[j].r += (sc[j].r - dc[j].r) * f3;
-                // dc[j].g += (sc[j].g - dc[j].g) * f3;
-                // dc[j].b += (sc[j].b - dc[j].b) * f3;
-                // dc[j].a = f2;
-            }
+            dc[j].a = idiv255(dc[j].a * (255 - sc[j].a));
         }
     }
 }

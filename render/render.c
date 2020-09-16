@@ -1174,11 +1174,6 @@ static void render(context_t *ctx, float x, float y, style_t style)
 			}
 		}
 
-		if (copy_fill)
-			surface_filter_opacity(copy_fill, style.fill_color.a);
-		if (copy_stroke)
-			surface_filter_opacity(copy_stroke, style.stroke_color.a);
-
 		if (shadow)
 			base = shadow;
 		else if (bg)
@@ -1198,15 +1193,16 @@ static void render(context_t *ctx, float x, float y, style_t style)
 
 		if (shadow && (!bg))
 		{
-			surface_cover_with_opacity(base, copy_fill, origin_shape.x - origin.x, origin_shape.y - origin.y, style.fill_color.a);
-		}
-		else if (copy_fill && (copy_fill != base))
-		{
-			surface_blit(base, copy_fill, origin_shape.x - origin.x, origin_shape.y - origin.y);
+			surface_composite_out(base, copy_fill, origin_shape.x - origin.x, origin_shape.y - origin.y);
 		}
 
+		if (copy_fill != base)
+			surface_blit_with_opacity(base, copy_fill, origin_shape.x - origin.x, origin_shape.y - origin.y, style.fill_color.a);
+		else
+			surface_filter_opacity(copy_fill, style.fill_color.a);
+
 		if (copy_stroke)
-			surface_blit(base, copy_stroke, origin_shape.x - origin.x, origin_shape.y - origin.y);
+			surface_blit_with_opacity(base, copy_stroke, origin_shape.x - origin.x, origin_shape.y - origin.y, style.stroke_color.a);
 		surface_blit(ctx->base, base, origin.x, origin.y);
 	}
 	context_surface_free(ctx);
