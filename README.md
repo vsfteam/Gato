@@ -15,8 +15,14 @@ SUM:                             3            279             56           2020
 ```
 ## 使用说明
 - 准备
+### `Ubuntu`
 ```sh
 sudo apt-get install libsdl2-dev
+```
+### `Mac`
+```sh
+brew install sdl2
+brew install pkg-config
 ```
 - 编译
 ```sh
