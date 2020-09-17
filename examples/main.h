@@ -14,7 +14,7 @@ static int mouse_x, mouse_y;
 static void frambuffer_init()
 {
     SDL_Init(SDL_INIT_VIDEO);
-    gWindow = SDL_CreateWindow("SDL", 100, 100, W, H, SDL_WINDOW_SHOWN);
+    gWindow = SDL_CreateWindow("Gate", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, W, H, SDL_WINDOW_SHOWN);
     gSurface = SDL_GetWindowSurface(gWindow);
 }
 
