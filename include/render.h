@@ -116,3 +116,4 @@ void draw_rectage(surface_t *base, float x, float y, float w, float h, float rad
 void draw_svg(surface_t *base, char *path, float vb_w, float vb_h, float w, float h, int x, int y, color_t color);
 void draw_text(surface_t *base, int x, int y, char *c, float size, color_t color);
 void draw_image(surface_t *base, const char *file, int x, int y, int w, int h);
+surface_t *surface_svg_get(char *path, float vb_w, float vb_h, float w, float h, color_t color);

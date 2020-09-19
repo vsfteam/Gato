@@ -3,15 +3,15 @@
 #include "image.h"
 #include "math.h"
 
-#define W 1200
-#define H 300
+#define W 1920
+#define H 1080
 #define N 10
-
+#define M 11
 #define fclampf(v, a, b) fminf(fmaxf(a, v), b)
 
-static surface_t *image[N] = {0};
+static surface_t *image[M] = {0};
 
-static char *image_path[N] = {
+static char *image_path[M] = {
 	"res/appstore.png",
 	"res/messages.png",
 	"res/calendar.png",
@@ -22,14 +22,15 @@ static char *image_path[N] = {
 	"res/facetime.png",
 	"res/dictionnary.png",
 	"res/safari.png",
-};
+	"res/Sierra.jpg"};
+
 static void motion_get_xy(int *x, int *y);
 
-static surface_t *image_get(int index)
+static surface_t *image_get(int index, int width, int height)
 {
 	if (image[index] == 0)
 	{
-		image[index] = surface_image_load(image_path[index], 100, 100);
+		image[index] = surface_image_load(image_path[index], width, height);
 	}
 	return image[index];
 }
@@ -39,6 +40,11 @@ static void draw_icon(surface_t *base, float size, float x, float y, surface_t *
 	surface_t *s = surface_image_resize(image, size, size);
 	surface_blit(base, s, x, y);
 	surface_free(s);
+}
+
+static void draw_wallpaper(surface_t *base)
+{
+	surface_cover(base, image_get(10, 1920, 1080), 0, 0);
 }
 
 static float calc(int dis)
@@ -67,7 +73,8 @@ static float f(float x, float b, float A)
 static void sample(surface_t *base, float fps)
 {
 	printf("fps:%f\n", fps);
-	surface_clear(base, RGB(0xFFFFFF), 0, 0, base->width, base->height);
+	draw_wallpaper(base);
+
 	int m_x, m_y;
 	float size[N] = {0};
 	float w[N] = {0};
@@ -87,7 +94,7 @@ static void sample(surface_t *base, float fps)
 	float right = W / 2 + 60 * N / 2.0;
 	static float A = 0;
 
-	if (m_x < left || m_x > right || m_y < H - 60 || m_y > H)
+	if (m_x < left || m_x > right || m_y < H - 70 || m_y > H - 10)
 	{
 		A = fclampf(A - 8 * 40.0 / fps, 0, 60);
 	}
@@ -105,16 +112,18 @@ static void sample(surface_t *base, float fps)
 		float d2 = f(x, m_x, A) - center;
 		size[i] = d2 - d1;
 	}
-
-	draw_rectage(base, m_x + off[0], H - 60, size[N - 1] + off[N - 1] - off[0], 60, 10, (style_t){
-		fill_color : RGB(0xE1E1E1),
-		border_radius : {1, 1, 0, 0},
-		stroke_color : RGB(0xB2B2B2),
+	draw_rectage(base, m_x + off[0], H - 60 - 10, size[N - 1] + off[N - 1] - off[0], 60, 10, (style_t){
+		fill_color : ARGB(0x00FFFFFF),
+		border_radius : {1, 1, 1, 1},
+		stroke_color : ARGB(0x2FB2B2B2),
 		stroke_width : 1,
+		shadow : (shadow_t[]){0, 0, 10, RGB(0x0)},
+		n_shadow : 1,
+        background_blur: 20
 	});
 	for (int i = 0; i < N; i++)
 	{
-		draw_icon(base, size[i], m_x + off[i], H - size[i], image_get(i));
+		draw_icon(base, size[i], m_x + off[i], H - size[i] - 10, image_get(i, 100, 100));
 	}
 }
 

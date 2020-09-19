@@ -45,8 +45,9 @@ int main()
     atexit(ProfilerStop);
 #endif
     frambuffer_init();
-    float fps = 0;
-
+    float fps[4] = {0};
+    int fps_index = 0;
+    float cur_fps = 0;
 #if 0
     surface_t *surface = surface_alloc(W, H);
 
@@ -63,10 +64,11 @@ int main()
             }
         }
         clock_gettime(CLOCK_MONOTONIC, &time1);
-        draw_new_UI(surface);
+        sample(surface, cur_fps);
         clock_gettime(CLOCK_MONOTONIC, &time2);
         unsigned long long mtime = (time2.tv_sec - time1.tv_sec) * 1000000 + (time2.tv_nsec - time1.tv_nsec) / 1000;
-        fps =  1000000.0f / mtime;
+        fps[(fps_index++) % 4] = 1000000.0f / mtime;
+        cur_fps = (fps[0] + fps[1] + fps[2] + fps[3]) / 3;
     }
 #else
 
@@ -92,11 +94,12 @@ int main()
             }
         }
 
-        sample(surface, fps);
+        sample(surface, cur_fps);
         SDL_UpdateWindowSurface(gWindow);
         clock_gettime(CLOCK_MONOTONIC, &time2);
         unsigned long long mtime = (time2.tv_sec - time1.tv_sec) * 1000000 + (time2.tv_nsec - time1.tv_nsec) / 1000;
-        fps = 1000000.0f / mtime;
+        fps[(fps_index++) % 4] = 1000000.0f / mtime;
+        cur_fps = (fps[0] + fps[1] + fps[2] + fps[3]) / 3;
     }
     frambuffer_close();
 #endif

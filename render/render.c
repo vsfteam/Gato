@@ -1449,6 +1449,29 @@ void draw_rectage(surface_t *base, float x, float y, float w, float h, float rad
 	context_exit(ctx);
 }
 
+surface_t *surface_svg_get(char *path, float vb_w, float vb_h, float w, float h, color_t color)
+{
+	context_t *ctx = &(context_t){0};
+
+	surface_t *base = surface_alloc(w, h);
+	context_init(ctx, base);
+	context_cap_style_set(ctx, CAP_BUTT);
+	context_join_style_set(ctx, JOIN_BEVEL);
+
+	svg_style_t style = (svg_style_t){
+		scale : w / vb_w,
+		translate_x : 0,
+		translate_y : 0,
+	};
+	svg_to(ctx, path, style);
+	render(ctx, 0, 0, (style_t){
+		fill_color : color
+	});
+	context_exit(ctx);
+
+	return base;
+}
+
 void draw_svg(surface_t *base, char *path, float vb_w, float vb_h, float w, float h, int x, int y, color_t color)
 {
 	context_t *ctx = &(context_t){0};
