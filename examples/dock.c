@@ -112,7 +112,7 @@ static void sample(surface_t *base, float fps)
 		float d2 = f(x, m_x, A) - center;
 		size[i] = d2 - d1;
 	}
-	draw_rectage(base, m_x + off[0], H - 60 - 10, size[N - 1] + off[N - 1] - off[0], 60, 10, (style_t){
+	draw_rectangle(base, m_x + off[0], H - 60 - 10, size[N - 1] + off[N - 1] - off[0], 60, 10, (style_t){
 		fill_color : ARGB(0x00FFFFFF),
 		border_radius : {1, 1, 1, 1},
 		stroke_color : ARGB(0x2FB2B2B2),

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "render.h"
+#include "surface.h"
+
 typedef struct svg_cmd_t
 {
     union
@@ -76,17 +79,18 @@ typedef struct svg_cmd_t
     };
     char cmd;
     int short_format;
-}svg_cmd_t;
+} svg_cmd_t;
 
 typedef struct svg_style_t
 {
     float scale;
-    float translate_x,translate_y;
-    float viewbox_width,viewbox_height;
-    int mirror_x,mirror_y;
+    float translate_x, translate_y;
+    float viewbox_width, viewbox_height;
+    int mirror_x, mirror_y;
 } svg_style_t;
 
-enum token_type_t {
+enum token_type_t
+{
     TOKEN_TYPE_CMD,
     TOKEN_TYPE_NUM,
     TOKEN_TYPE_END
@@ -101,11 +105,12 @@ typedef struct token_t
 
 typedef struct svg_parser_t
 {
-    char * buf;
+    char *buf;
     int len;
     int index;
     char cmd;
-}svg_parser_t;
-int svg_cmd_transform(svg_cmd_t *cmd, svg_style_t style);
-int svg_cmd_parser(svg_parser_t *parser, svg_cmd_t *cmd);
-void svg_parser_init(svg_parser_t *parser, const char *buf);
+} svg_parser_t;
+
+void svg_to(context_t *ctx, const char *buf, svg_style_t style);
+surface_t *surface_svg_get(char *path, float vb_w, float vb_h, float w, float h, color_t color);
+void draw_svg(surface_t *base, char *path, float vb_w, float vb_h, float w, float h, int x, int y, color_t color);

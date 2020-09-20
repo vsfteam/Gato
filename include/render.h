@@ -1,6 +1,7 @@
 #pragma once
 #include "color.h"
 #include "surface.h"
+#include "point.h"
 
 typedef struct shadow_t
 {
@@ -59,12 +60,6 @@ enum point_path_type_t
     POINT_PATH_CLOSE = 2,
 };
 
-typedef struct point_t
-{
-    float x;
-    float y;
-} point_t;
-
 typedef struct cube_bez_t
 {
     point_t p[4];
@@ -86,6 +81,8 @@ typedef struct edge_t
     int dir;
 } edge_t;
 
+typedef struct context_t context_t;
+
 typedef struct context_t
 {
     float width;
@@ -102,7 +99,18 @@ typedef struct context_t
     enum fill_rule_t rule;
     point_t min, max, origin;
     surface_t *s, *base;
+
+    void (*move_to)(context_t *ctx, float x, float y);
+    void (*line_to)(context_t *ctx, float x, float y);
+    void (*cubic_bezto)(context_t *ctx, point_t p1, point_t p2, point_t p3, point_t p4);
+    void (*quad_bezto)(context_t *ctx, point_t p1, point_t p2, point_t p3);
+    void (*arc_to)(context_t *ctx, float rx, float ry, float rotation, int large, int sweep, point_t p0, point_t p1);
+    void (*close_path)(context_t *ctx);
+    void (*render)(context_t *ctx, float x, float y, style_t style);
 } context_t;
+
+void context_init(context_t *ctx, surface_t *base);
+void context_exit(context_t *ctx);
 
 void draw_line(surface_t *base, point_t p0, point_t p1, style_t style);
 void draw_polyline(surface_t *base, point_t *p, int n, style_t style);
@@ -112,7 +120,7 @@ void draw_arc(surface_t *base, float x, float y, float radius, float a1, float a
 void draw_circle(surface_t *base, float x, float y, float radius, style_t style);
 
 void draw_ellipse(surface_t *base, float x, float y, float w, float h, style_t style);
-void draw_rectage(surface_t *base, float x, float y, float w, float h, float radius, style_t style);
+void draw_rectangle(surface_t *base, float x, float y, float w, float h, float radius, style_t style);
 void draw_svg(surface_t *base, char *path, float vb_w, float vb_h, float w, float h, int x, int y, color_t color);
 void draw_text(surface_t *base, int x, int y, char *c, float size, color_t color);
 void draw_image(surface_t *base, const char *file, int x, int y, int w, int h);

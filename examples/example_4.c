@@ -18,7 +18,7 @@ static void sample(surface_t *base, float fps)
             {-10, -10, 10, RGB(0xff7f00)}},
         n_shadow : 2,
     };
-    draw_rectage(base, 571, 111, 461, 995, 50, style);
+    draw_rectangle(base, 571, 111, 461, 995, 50, style);
     draw_text(base, 632, 244, "Kettle", 4, RGB(0x000000));
     draw_text(base, 735, 370, "28 C", 70 / 16, RGB(0x000000));
     draw_text(base, 735, 439, "current temp", 1, RGB(0xBFC0C3));

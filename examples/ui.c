@@ -48,7 +48,7 @@ int sample(surface_t *base, float fps)
     int x = 5, y = 5;
 
     //menu
-    draw_rectage(base, x, y, 81, 1041, 18, (style_t){
+    draw_rectangle(base, x, y, 81, 1041, 18, (style_t){
         fill_color : RGB(0x5864FF),
         border_radius : {
             [0] = 1,
@@ -67,16 +67,16 @@ int sample(surface_t *base, float fps)
         draw_svg_image(base, 3, 1024, 1024, 25, 25, 30, 294, RGB(0xFFFFFF));
         draw_svg_image(base, 4, 1024, 1024, 25, 25, 30, 384, RGB(0xFFFFFF)); // FIXME
         draw_svg_image(base, 5, 1024, 1024, 25, 25, 30, 474, RGB(0xFFFFFF));
-        draw_rectage(base, x, y + 114, 2, 67, 0, (style_t){
+        draw_rectangle(base, x, y + 114, 2, 67, 0, (style_t){
             fill_color : RGB(0xFFFFFF),
         });
-        draw_rectage(base, x + 2, y + 114, 81 - 2, 67, 0, (style_t){
+        draw_rectangle(base, x + 2, y + 114, 81 - 2, 67, 0, (style_t){
             fill_color : ARGB(0x1FFFFFFF),
         });
     }
 
     //content
-    draw_rectage(base, x + 81, y, 1391, 1041, 18, (style_t){
+    draw_rectangle(base, x + 81, y, 1391, 1041, 18, (style_t){
         fill_color : RGB(0xF6F8FB),
         border_radius : {
             [1] = 1,
@@ -87,7 +87,7 @@ int sample(surface_t *base, float fps)
         int x = 5 + 81, y = 5;
 
         //left
-        draw_rectage(base, x, y, 261, 1041, 18, (style_t){
+        draw_rectangle(base, x, y, 261, 1041, 18, (style_t){
             fill_color : RGB(0xFFFFFF),
         });
         {
@@ -141,7 +141,7 @@ int sample(surface_t *base, float fps)
             draw_text(base, x + 26, y + 438 + 43 + 43, "Starred", 1, RGB(0x212E7C));
             draw_text(base, x + 26, y + 438 + 43 + 43 + 43, "Trash", 1, RGB(0x212E7C));
 
-            draw_rectage(base, x + 25, y + 708, 214, 239, 8, (style_t){
+            draw_rectangle(base, x + 25, y + 708, 214, 239, 8, (style_t){
                 fill_color : RGB(0xF6F8FB),
                 border_radius : {
                     [0] = 1,
@@ -166,7 +166,7 @@ int sample(surface_t *base, float fps)
                 draw_svg_image(base, 13, 1024, 1024, 18, 18, x + 20, y + 26 + 58 + 40 + 40 + 40, RGB(0x6B76F7));
             }
 
-            draw_rectage(base, x + 25, y + 708 + 239 + 20, 214, 53, 8, (style_t){
+            draw_rectangle(base, x + 25, y + 708 + 239 + 20, 214, 53, 8, (style_t){
                 fill_color : RGB(0x5864FF),
                 border_radius : {
                     [0] = 1,
@@ -179,7 +179,7 @@ int sample(surface_t *base, float fps)
                 int x = 5 + 81 + 25, y = 5 + 708 + 239 + 20;
 
                 draw_text(base, x + 37, y + 18, "Create new", 1.2, RGB(0xFFFFFF));
-                draw_rectage(base, x + 168, y + 8, 37, 37, 5, (style_t){
+                draw_rectangle(base, x + 168, y + 8, 37, 37, 5, (style_t){
                     fill_color : RGB(0x7983FF),
                     border_radius : {
                         [0] = 1,
@@ -200,7 +200,7 @@ int sample(surface_t *base, float fps)
         {
             int x = 5 + 81 + 261, y = 5;
             //search
-            draw_rectage(base, x + 25, y + 27, 716, 52, 8, (style_t){
+            draw_rectangle(base, x + 25, y + 27, 716, 52, 8, (style_t){
                 fill_color : RGB(0xFFFFFF),
                 border_radius : {
                     [0] = 1,
@@ -216,7 +216,7 @@ int sample(surface_t *base, float fps)
                 draw_text(base, x + 66, y + 19, "Search the files", 1.1, RGB(0xD6D6E3));
             }
 
-            draw_rectage(base, x - 18, y + 115, 267, 209, 8, (style_t){
+            draw_rectangle(base, x - 18, y + 115, 267, 209, 8, (style_t){
                 fill_color : RGB(0x5864FF),
                 border_radius : {
                     [0] = 1,
@@ -233,7 +233,7 @@ int sample(surface_t *base, float fps)
                     image[0] = surface_image_load("res/1.jpg", 66, 66);
                 }
 
-                draw_rectage(base, x + 19, y + 19, 65, 65, 10, (style_t){
+                draw_rectangle(base, x + 19, y + 19, 65, 65, 10, (style_t){
                     fill_color : RGB(0x0),
                     border_radius : {
                         [0] = 1,
@@ -247,7 +247,7 @@ int sample(surface_t *base, float fps)
                 draw_text(base, x + 19, y + 151, "45.5 GB", 1.0, RGB(0xDADDFE));
                 draw_text(base, x + 197, y + 151, "50 GB", 1.0, RGB(0xDADDFE));
             }
-            draw_rectage(base, x + 273, y + 129, 225, 174, 8, (style_t){
+            draw_rectangle(base, x + 273, y + 129, 225, 174, 8, (style_t){
                 fill_color : RGB(0xFFFFFF),
                 border_radius : {
                     [0] = 1,
@@ -262,7 +262,7 @@ int sample(surface_t *base, float fps)
                 {
                     image[1] = surface_image_load("res/2.png", 66, 66);
                 }
-                draw_rectage(base, x + 16, y + 16, 52, 52, 8, (style_t){
+                draw_rectangle(base, x + 16, y + 16, 52, 52, 8, (style_t){
                     fill_color : RGB(0xF6F8FB),
                     border_radius : {
                         [0] = 1,
@@ -278,7 +278,7 @@ int sample(surface_t *base, float fps)
                 draw_text(base, x + 18, y + 125, "1,2 GB", 1.0, RGB(0x414C8F));
                 draw_text(base, x + 173, y + 125, "3 GB", 1.0, RGB(0x414C8F));
             }
-            draw_rectage(base, x + 520, y + 129, 225, 174, 8, (style_t){
+            draw_rectangle(base, x + 520, y + 129, 225, 174, 8, (style_t){
                 fill_color : RGB(0xFFFFFF),
                 border_radius : {
                     [0] = 1,
@@ -289,7 +289,7 @@ int sample(surface_t *base, float fps)
             });
             {
                 int x = 5 + 81 + 261 + 520, y = 5 + 129;
-                draw_rectage(base, x + 16, y + 16, 52, 52, 8, (style_t){
+                draw_rectangle(base, x + 16, y + 16, 52, 52, 8, (style_t){
                     fill_color : RGB(0xF6F8FB),
                     border_radius : {
                         [0] = 1,
@@ -303,7 +303,7 @@ int sample(surface_t *base, float fps)
                 {
                     image[2] = surface_image_load("res/3.png", 66, 66);
                 }
-                draw_rectage(base, x + 16, y + 16, 52, 52, 8, (style_t){
+                draw_rectangle(base, x + 16, y + 16, 52, 52, 8, (style_t){
                     fill_color : RGB(0xF6F8FB),
                     border_radius : {
                         [0] = 1,
@@ -320,7 +320,7 @@ int sample(surface_t *base, float fps)
             }
             draw_text(base, x + 25, y + 359, "Folders", 1.2, RGB(0));
             draw_text(base, x + 680, y + 363, "View all", 0.9, RGB(0x505EED));
-            draw_rectage(base, x + 25, y + 408, 225, 117, 8, (style_t){
+            draw_rectangle(base, x + 25, y + 408, 225, 117, 8, (style_t){
                 fill_color : RGB(0xFFFFFF),
                 border_radius : {
                     [0] = 1,
@@ -335,7 +335,7 @@ int sample(surface_t *base, float fps)
                 draw_text(base, x + 17, y + 61, "Analytics", 1.1, RGB(0x293681));
                 draw_text(base, x + 17, y + 86, "15 files", 0.9, RGB(0x9CA2C4));
             }
-            draw_rectage(base, x + 274, y + 408, 225, 117, 8, (style_t){
+            draw_rectangle(base, x + 274, y + 408, 225, 117, 8, (style_t){
                 fill_color : RGB(0xFFFFFF),
                 border_radius : {
                     [0] = 1,
@@ -350,7 +350,7 @@ int sample(surface_t *base, float fps)
                 draw_text(base, x + 17, y + 61, "Assets", 1.1, RGB(0x293681));
                 draw_text(base, x + 17, y + 86, "345 files", 0.9, RGB(0x9CA2C4));
             }
-            draw_rectage(base, x + 521, y + 408, 225, 117, 8, (style_t){
+            draw_rectangle(base, x + 521, y + 408, 225, 117, 8, (style_t){
                 fill_color : RGB(0xFFFFFF),
                 border_radius : {
                     [0] = 1,
@@ -379,7 +379,7 @@ int sample(surface_t *base, float fps)
 
             {
                 int x = 5 + 81 + 261 + 25, y = 5 + 662;
-                draw_rectage(base, x, y, 28, 28, 2, (style_t){
+                draw_rectangle(base, x, y, 28, 28, 2, (style_t){
                     fill_color : RGB(0xFF6760),
                     border_radius : {
                         [0] = 1,
@@ -400,7 +400,7 @@ int sample(surface_t *base, float fps)
 
             {
                 int x = 5 + 81 + 261 + 25, y = 5 + 662 + 62;
-                draw_rectage(base, x, y, 28, 28, 2, (style_t){
+                draw_rectangle(base, x, y, 28, 28, 2, (style_t){
                     fill_color : RGB(0x6394FF),
                     border_radius : {
                         [0] = 1,
@@ -420,7 +420,7 @@ int sample(surface_t *base, float fps)
 
             {
                 int x = 5 + 81 + 261 + 25, y = 5 + 662 + 62 + 62;
-                draw_rectage(base, x, y, 28, 28, 2, (style_t){
+                draw_rectangle(base, x, y, 28, 28, 2, (style_t){
                     fill_color : RGB(0x6394FF),
                     border_radius : {
                         [0] = 1,
@@ -439,7 +439,7 @@ int sample(surface_t *base, float fps)
             }
             {
                 int x = 5 + 81 + 261 + 25, y = 5 + 662 + 62 + 62 + 62;
-                draw_rectage(base, x, y, 28, 28, 2, (style_t){
+                draw_rectangle(base, x, y, 28, 28, 2, (style_t){
                     fill_color : RGB(0xFF6760),
                     border_radius : {
                         [0] = 1,
@@ -458,7 +458,7 @@ int sample(surface_t *base, float fps)
             }
             {
                 int x = 5 + 81 + 261 + 25, y = 5 + 662 + 62 + 62 + 62 + 62;
-                draw_rectage(base, x, y, 28, 28, 2, (style_t){
+                draw_rectangle(base, x, y, 28, 28, 2, (style_t){
                     fill_color : RGB(0xFBC02D),
                     border_radius : {
                         [0] = 1,
@@ -477,7 +477,7 @@ int sample(surface_t *base, float fps)
             }
             {
                 int x = 5 + 81 + 261 + 25, y = 5 + 662 + 62 + 62 + 62 + 62 + 62;
-                draw_rectage(base, x, y, 28, 28, 2, (style_t){
+                draw_rectangle(base, x, y, 28, 28, 2, (style_t){
                     fill_color : RGB(0x6394FF),
                     border_radius : {
                         [0] = 1,
@@ -497,7 +497,7 @@ int sample(surface_t *base, float fps)
         }
 
         //right
-        draw_rectage(base, x + 261 + 765, y, 1391 - 261 - 765, 1041, 18, (style_t){
+        draw_rectangle(base, x + 261 + 765, y, 1391 - 261 - 765, 1041, 18, (style_t){
             fill_color : RGB(0xFFFFFF),
             border_radius : {
                 [1] = 1,
@@ -516,7 +516,7 @@ int sample(surface_t *base, float fps)
             {
                 int x = 5 + 81 + 261 + 765 + 23, y = 5 + 156;
 
-                draw_rectage(base, x, y, 49, 49, 7, (style_t){
+                draw_rectangle(base, x, y, 49, 49, 7, (style_t){
                     fill_color : RGB(0xEFF0FE),
                     border_radius : {
                         [0] = 1,
@@ -537,7 +537,7 @@ int sample(surface_t *base, float fps)
             {
                 int x = 5 + 81 + 261 + 765 + 23, y = 5 + 156 + 73;
 
-                draw_rectage(base, x, y, 49, 49, 7, (style_t){
+                draw_rectangle(base, x, y, 49, 49, 7, (style_t){
                     fill_color : RGB(0xE6FAF3),
                     border_radius : {
                         [0] = 1,
@@ -558,7 +558,7 @@ int sample(surface_t *base, float fps)
             {
                 int x = 5 + 81 + 261 + 765 + 23, y = 5 + 156 + 73 + 73;
 
-                draw_rectage(base, x, y, 49, 49, 7, (style_t){
+                draw_rectangle(base, x, y, 49, 49, 7, (style_t){
                     fill_color : RGB(0xFFEFEE),
                     border_radius : {
                         [0] = 1,
@@ -579,7 +579,7 @@ int sample(surface_t *base, float fps)
             {
                 int x = 5 + 81 + 261 + 765 + 23, y = 5 + 156 + 73 + 73 + 73;
 
-                draw_rectage(base, x, y, 49, 49, 7, (style_t){
+                draw_rectangle(base, x, y, 49, 49, 7, (style_t){
                     fill_color : RGB(0xFEF8E7),
                     border_radius : {
                         [0] = 1,
@@ -600,7 +600,7 @@ int sample(surface_t *base, float fps)
             {
                 int x = 5 + 81 + 261 + 765 + 23, y = 5 + 156 + 73 + 73 + 73 + 73;
 
-                draw_rectage(base, x, y, 49, 49, 7, (style_t){
+                draw_rectangle(base, x, y, 49, 49, 7, (style_t){
                     fill_color : RGB(0xEFF4FF),
                     border_radius : {
                         [0] = 1,
@@ -617,7 +617,7 @@ int sample(surface_t *base, float fps)
                 draw_text(base, x + 63, y + 30, "57 files", 0.9, RGB(0x9197BE));
                 draw_text(base, x + 242, y + 17, "175 MB", 1.1, RGB(0x4957EC));
             }
-            draw_rectage(base, x + 23, y + 534, 309, 484, 16, (style_t){
+            draw_rectangle(base, x + 23, y + 534, 309, 484, 16, (style_t){
                 fill_color : RGB(0xF4F6FA),
                 border_radius : {
                     [0] = 1,
@@ -630,7 +630,7 @@ int sample(surface_t *base, float fps)
                 int x = 5 + 81 + 261 + 23, y = 300;
 
                 //upgrade
-                draw_rectage(base, x + 26, y + 23, 335, 509, 16, (style_t){
+                draw_rectangle(base, x + 26, y + 23, 335, 509, 16, (style_t){
                     fill_color : ARGB(0x3FFFFFFF),
                     stroke_color : RGB(0xD1D4F4),
                     background_blur : 15,
@@ -648,7 +648,7 @@ int sample(surface_t *base, float fps)
                     draw_text(base, x + 33, y + 353, "5 integrations, 30 team members,", 1.0, RGB(0x6D74BF));
                     draw_text(base, x + 53, y + 379, "advanced features for teams", 1.0, RGB(0x6D74BF));
 
-                    draw_rectage(base, x + 89, y + 419, 155, 50, 8, (style_t){
+                    draw_rectangle(base, x + 89, y + 419, 155, 50, 8, (style_t){
                         fill_color : RGB(0x5864FF),
                         border_radius : {
                             [0] = 1,
