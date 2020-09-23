@@ -7,11 +7,11 @@ endif
 
 X_CFLAGS	+= -std=gnu11 -O3 -g
 X_ASFLAGS	+= -O3 -g
-X_LIBS		+= m pthread c++
+X_LIBS		+= m pthread
 # X_DEFINES	+= PROFILE
 # X_LDFLAGS	+= -lprofiler
 X_LDFLAGS	+= `pkg-config sdl2 --libs --cflags`
-X_INCDIRS	+= include gumbo
+X_INCDIRS	+= include
 
-SRC			+= $(MAIN_SRC) render/*.c image/image.c gumbo/*.c
+SRC			+= $(MAIN_SRC) render/*.c image/image.c
 NAME		:= Gato
