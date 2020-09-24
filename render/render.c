@@ -198,6 +198,8 @@ static void rasterize_sorted_edges(context_t *ctx, edge_t es[], int elen, color_
 		}
 	}
 
+	if (a)
+		free(a);
 	if (scanline)
 		free(scanline);
 }
