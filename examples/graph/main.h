@@ -99,7 +99,7 @@ int main()
         clock_gettime(CLOCK_MONOTONIC, &time2);
         unsigned long long mtime = (time2.tv_sec - time1.tv_sec) * 1000000 + (time2.tv_nsec - time1.tv_nsec) / 1000;
         fps[(fps_index++) % 4] = 1000000.0f / mtime;
-        cur_fps = (fps[0] + fps[1] + fps[2] + fps[3]) / 3;
+        cur_fps = (fps[0] + fps[1] + fps[2] + fps[3]) / 4;
     }
     frambuffer_close();
 #endif
