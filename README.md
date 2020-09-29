@@ -31,8 +31,8 @@ brew install pkg-config
 ```
 - 编译
 ```sh
-make                            #默认编译examples/ui.c
-make MAIN=examples/example_1.c  #编译examples/example_1.c
+make                            #默认编译examples/graph/ui.c
+make MAIN=examples/graph/example_1.c  #编译examples/graph/example_1.c
 ```
 - 运行
 ```sh

@@ -890,7 +890,7 @@ static void render(context_t *ctx, float x, float y, style_t style)
 		surface_t *base = NULL;
 		point_t origin = {0};
 		//TODO: No set fill color, still show image
-		if (copy_fill && style.clip_image != 0)
+		if (copy_fill && (style.clip_image != 0))
 		{
 			surface_mask(copy_fill, style.clip_image, ceilf(x - ctx->origin.x), ceilf(y - ctx->origin.y));
 		}
