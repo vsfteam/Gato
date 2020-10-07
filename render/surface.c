@@ -8,6 +8,11 @@
 #define clamp(v, a, b) min(max(a, v), b)
 #define fclampf(v, a, b) fminf(fmaxf(a, v), b)
 
+static int surface_overlap_is(surface_t *s, int x, int y, int w, int h)
+{
+    return x < s->width && y < s->height && (x + w) > 0 && (y + h) > 0;
+}
+
 surface_t *surface_alloc(int width, int height)
 {
     surface_t *s;
@@ -107,6 +112,9 @@ surface_t *surface_clone(surface_t *s, int x, int y, int w, int h)
 
 void surface_blit(surface_t *d, surface_t *s, int x, int y)
 {
+    if (!surface_overlap_is(d, x, y, s->width, s->height))
+        return;
+
     int xs = clamp(x, 0, d->width - 1);
     int xe = clamp(x + s->width - 1, 0, d->width - 1);
     int ys = clamp(y, 0, d->height - 1);
@@ -125,6 +133,9 @@ void surface_blit(surface_t *d, surface_t *s, int x, int y)
 
 void surface_blit_with_opacity(surface_t *d, surface_t *s, int x, int y, int a)
 {
+    if (!surface_overlap_is(d, x, y, s->width, s->height))
+        return;
+
     if (a == 255)
     {
         surface_blit(d, s, x, y);
@@ -149,6 +160,9 @@ void surface_blit_with_opacity(surface_t *d, surface_t *s, int x, int y, int a)
 
 void surface_mask(surface_t *d, surface_t *s, int x, int y)
 {
+    if (!surface_overlap_is(d, x, y, s->width, s->height))
+        return;
+
     int xs = clamp(x, 0, d->width - 1);
     int xe = clamp(x + s->width - 1, 0, d->width - 1);
     int ys = clamp(y, 0, d->height - 1);
@@ -187,6 +201,9 @@ void surface_mask(surface_t *d, surface_t *s, int x, int y)
 
 void surface_cover(surface_t *d, surface_t *s, int x, int y)
 {
+    if (!surface_overlap_is(d, x, y, s->width, s->height))
+        return;
+
     int xs = clamp(x, 0, d->width - 1);
     int xe = clamp(x + s->width - 1, 0, d->width - 1);
     int ys = clamp(y, 0, d->height - 1);
@@ -205,6 +222,9 @@ void surface_cover(surface_t *d, surface_t *s, int x, int y)
 
 void surface_composite_out(surface_t *d, surface_t *s, int x, int y)
 {
+    if (!surface_overlap_is(d, x, y, s->width, s->height))
+        return;
+
     int xs = clamp(x, 0, d->width - 1);
     int xe = clamp(x + s->width - 1, 0, d->width - 1);
     int ys = clamp(y, 0, d->height - 1);
