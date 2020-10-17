@@ -10,6 +10,7 @@
 #include <time.h>
 #include <functional>
 #include <random>
+#include <chrono>
 
 #include "Style.h"
 class Surface
@@ -597,7 +598,12 @@ public:
     void OnExit() {}
 };
 
+#ifdef _WIN32
+#include <Windows.h>  
+int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+#else
 int main()
+#endif
 {
     MyWindow().MainLoop();
     return 0;
