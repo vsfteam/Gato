@@ -5,10 +5,11 @@ ifeq ("$(origin MAIN)", "command line")
 MAIN_SRC	:= $(MAIN)
 endif
 
-X_CFLAGS	+= -std=gnu11 -O3 -g
-X_ASFLAGS	+= -O3 -g
+OPT_FLAGS	+= -O0 -g
+X_CFLAGS	+= -std=gnu11 $(OPT_FLAGS)
+X_ASFLAGS	+= $(OPT_FLAGS)
 X_LIBS		+= m pthread c++
-X_CXXFLAGS	+= -std=c++11 -O3 -g
+X_CXXFLAGS	+= -std=c++11 $(OPT_FLAGS)
 # X_DEFINES	+= PROFILE
 # X_LDFLAGS	+= -lprofiler
 X_LDFLAGS	+= `pkg-config sdl2 --libs --cflags`
