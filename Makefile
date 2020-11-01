@@ -1,6 +1,6 @@
 sinclude scripts/env.mk
 
-MAIN_SRC	:= examples/graph/ui.c
+MAIN_SRC	:= ui/main.cpp
 ifeq ("$(origin MAIN)", "command line")
 MAIN_SRC	:= $(MAIN)
 endif

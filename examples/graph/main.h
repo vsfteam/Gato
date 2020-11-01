@@ -36,7 +36,7 @@ static void motion_get_xy(int *x, int *y)
 #include <gperftools/profiler.h>
 #endif
 
-int main()
+void sdl_run()
 {
     struct timespec time1 = {0, 0};
     struct timespec time2 = {0, 0};
@@ -103,4 +103,17 @@ int main()
     }
     frambuffer_close();
 #endif
+}
+
+#ifdef _WIN32
+#undef N
+#undef H
+#include <Windows.h>
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+#else
+int main()
+#endif
+{
+    sdl_run();
+    return 0;
 }
