@@ -1,11 +1,11 @@
 sinclude scripts/env.mk
 
-MAIN_SRC	:= ui/main.cpp
+MAIN_SRC	:=
 ifeq ("$(origin MAIN)", "command line")
 MAIN_SRC	:= $(MAIN)
 endif
 
-OPT_FLAGS	+= -O0 -g
+OPT_FLAGS	+= -O3 -g
 X_CFLAGS	+= -std=gnu11 $(OPT_FLAGS)
 X_CXXFLAGS	+= -std=c++11 $(OPT_FLAGS)
 X_ASFLAGS	+= $(OPT_FLAGS)
@@ -30,5 +30,5 @@ endif
 
 X_INCDIRS	+= include
 
-SRC			+= $(MAIN_SRC) render/*.c image/image.c
+SRC			+= $(MAIN_SRC) render/*.c image/image.c ui/*.cpp
 NAME		:= Gato
