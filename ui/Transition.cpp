@@ -1,23 +1,29 @@
 #include "Transition.h"
 
-Transiton::Transiton(std::string _property, double _duration, std::string _timingFunc, double _delay)
-    : property(_property),
-      duration(_duration),
-      timingFunc(_timingFunc),
-      delay(_delay)
+Transiton::Transiton()
 {
 }
 
-Transiton::Transiton(std::string _property, double _duration, double _x1, double _y1, double _x2, double _y2, double _delay)
-    : property(_property),
-      duration(_duration),
+Transiton::Transiton(std::shared_ptr<GraphicObject> o, std::string property, double _duration, double _x1, double _y1, double _x2, double _y2, double _delay)
+    : duration(_duration),
       x1(_x1),
       y1(_y1),
       x2(_x2),
       y2(_y2),
       delay(_delay)
 {
+    if (property == "width" || property == "height")
+    {
+        react.reset(new LengthTransiton(o, property));
+    }
+    else
+    {
+        react.reset(new TransitonReact(o, property));
+    }
+
+    ChangeState(TransitonState::RESUME);
 }
+
 double Transiton::CubizBezierRecursive(double t, double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3)
 {
     double x01 = (x0 + x1) / 2.0;
@@ -55,21 +61,15 @@ double Transiton::CubizBezier(double t)
     return CubizBezierRecursive(t, 0, 0, x1, y1, x2, y2, 1, 1);
 }
 
-void Transiton::Update(GraphicObject &obj)
+void Transiton::Update()
 {
-    if (state == TransitonState::READY)
-    {
-        return;
-    }
-
     auto now = std::chrono::steady_clock::now();
     double ratio = 0.0f;
     if (now > end)
     {
-        state = TransitonState::READY;
+        printf("STOP\n");
         ratio = 0.0f;
-        // printf("END");
-        beginVal = endVal;
+        ChangeState(TransitonState::READY);
     }
     else
     {
@@ -77,41 +77,13 @@ void Transiton::Update(GraphicObject &obj)
         std::chrono::milliseconds total = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
         double t = dt.count() * 1.0f / total.count();
         ratio = CubizBezier(t);
-        // printf("t= %f ratio %f\n", t, ratio);
-    }
-
-    // if (property == "width")
-    {
-        printf("%f|%f\n", beginVal.AnyCast<ValueType::Length>().value, endVal.AnyCast<ValueType::Length>().value);
-        double bv = beginVal.AnyCast<ValueType::Length>().value;
-        double ev = endVal.AnyCast<ValueType::Length>().value;
-
-        curVal = ValueType::Length(bv +  (ev - bv) * (ratio), "px");
-        printf("curVal %f\n", curVal.AnyCast<ValueType::Length>().value);
-        obj.style.Set(property, std::to_string((int)curVal.AnyCast<ValueType::Length>().value) + "px"); //TODO: support float
+        react->OnUpdate(ratio);
     }
 }
 
-void Transiton::Run(GraphicObject &obj)
+void Transiton::Run()
 {
-
-    if (beginVal.Is<ValueType::Auto>())
-    {
-        beginVal = obj.style.Get(property);
-        return;
-    }
-
-    if (state == TransitonState::READY)
-    {
-        auto now = std::chrono::steady_clock::now();
-
-        std::chrono::milliseconds msec((int)(duration * 1000));
-        start = now;
-        end = start + msec;
-        state = TransitonState::RUN;
-        endVal = obj.style.Get(property);
-    }
-    else
+    if (state == TransitonState::RUN)
     {
         auto now = std::chrono::steady_clock::now();
 
@@ -119,13 +91,71 @@ void Transiton::Run(GraphicObject &obj)
         msec = std::chrono::duration_cast<std::chrono::milliseconds>(end - now);
         start = now;
         end = start + msec;
-        beginVal = curVal;
-        endVal = obj.style.Get(property);
+        ChangeState(TransitonState::RESUME);
+    }
+    else
+    {
+        auto now = std::chrono::steady_clock::now();
+
+        std::chrono::milliseconds msec((int)(duration * 1000));
+        start = now;
+        end = start + msec;
+        ChangeState(TransitonState::RUN);
     }
 }
 
-void Transiton::Init(Any styleVal)
+void Transiton::ChangeState(TransitonState newState)
 {
-    beginVal = styleVal;
-    printf("styleVal %f\n", styleVal.AnyCast<ValueType::Length>().value);
+    switch (newState)
+    {
+    case TransitonState::READY:
+        react->OnReady();
+        break;
+    case TransitonState::RUN:
+        react->OnRun();
+        break;
+    case TransitonState::RESUME:
+        react->OnResume();
+        newState = TransitonState::RUN;
+        break;
+    default:
+        break;
+    }
+    state = newState;
+}
+
+LengthTransiton::LengthTransiton(std::shared_ptr<GraphicObject> o, std::string property)
+    : TransitonReact(o, property)
+{
+    beginVal = endVal = o->style.Get(property).AnyCast<ValueType::Length>();
+}
+
+void LengthTransiton::OnReady()
+{
+    std::shared_ptr<GraphicObject> o = obj.lock();
+    o->style.Set(property, std::to_string((int)endVal.value) + "px"); //TODO: support float
+    beginVal = endVal;
+}
+
+void LengthTransiton::OnRun()
+{
+    std::shared_ptr<GraphicObject> o = obj.lock();
+    endVal = o->style.Get(property).AnyCast<ValueType::Length>();
+}
+
+void LengthTransiton::OnResume()
+{
+    beginVal = curVal;
+    std::shared_ptr<GraphicObject> o = obj.lock();
+    endVal = o->style.Get(property).AnyCast<ValueType::Length>();
+}
+
+void LengthTransiton::OnUpdate(double ratio)
+{
+    double bv = beginVal.value;
+    double ev = endVal.value;
+    std::shared_ptr<GraphicObject> o = obj.lock();
+    curVal = ValueType::Length(bv + (ev - bv) * (ratio), "px");
+    // printf("curVal %f\n", curVal.value);
+    o->style.Set(property, std::to_string((int)curVal.value) + "px"); //TODO: support float
 }

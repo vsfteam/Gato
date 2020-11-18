@@ -3,12 +3,12 @@
 #include "svg.h"
 #include "consolas-font.h"
 
-void draw_text(surface_t *base, int x, int y, char *c, float size, color_t color)
+void draw_text(surface_t *base, int x, int y, const char *c, float size, color_t color)
 {
 	context_t *ctx = &(context_t){0};
 	context_init(ctx, base);
 
-	float scale = size * 16 / (2048);
+	float scale = size / (2048.0);
 
 	svg_style_t style = (svg_style_t){
 		.scale = scale,

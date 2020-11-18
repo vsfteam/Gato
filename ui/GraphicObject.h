@@ -2,6 +2,9 @@
 
 #include "Style.h"
 #include "DrawRect.h"
+#include "DrawText.h"
+#include "Any.h"
+
 #include "Transition.h"
 #include "Event.h"
 
@@ -11,7 +14,7 @@
 class GraphicObject;
 class Transiton;
 
-using EventCallback = void(std::shared_ptr<GraphicObject>);
+using EventCallback = void(std::shared_ptr<GraphicObject>, Any e);
 
 class GraphicObject : public std::enable_shared_from_this<GraphicObject>
 {
@@ -21,8 +24,10 @@ protected:
     int absoluteX = 0, absoluteY = 0;
     int width = 0, height = 0;
     bool visiable = true;
-    std::function<EventCallback> onClickCallback;
+    std::map<std::string, std::function<EventCallback>> mapOfCallback;
+    bool drag = false;
     DrawRect draw;
+    DrawText text;
 
 public:
     std::map<std::string, Transiton> transitons;
@@ -66,51 +71,100 @@ public:
     int GetBorderWidth()
     {
         auto v = GetStyle("border-width");
-        return v.Is<ValueType::Auto>() ? 0 : v.AnyCast<ValueType::Length>().value;
+        return v.Is<ValueType::Unset>() ? 0 : v.AnyCast<ValueType::Length>().value;
+    }
+    int GetPadding(std::string dir)
+    {
+        auto v = GetStyle("padding-" + dir);
+
+        if (v.Is<ValueType::Unset>())
+        {
+            auto v = GetStyle("padding");
+            return v.Is<ValueType::Unset>() ? 0 : v.AnyCast<ValueType::Length>().value;
+        }
+        else
+        {
+            return v.AnyCast<ValueType::Length>().value;
+        }
+        return 0;
+    }
+
+    int GetMargin(std::string dir)
+    {
+        auto v = GetStyle("margin-" + dir);
+
+        if (v.Is<ValueType::Unset>())
+        {
+            auto v = GetStyle("margin");
+            return v.Is<ValueType::Unset>() ? 0 : v.AnyCast<ValueType::Length>().value;
+        }
+        else
+        {
+            return v.AnyCast<ValueType::Length>().value;
+        }
+        return 0;
     }
 
     int GetPaddingLeft()
     {
-        auto v = GetStyle("padding-left");
-        return v.Is<ValueType::Auto>() ? 0 : v.AnyCast<ValueType::Length>().value;
+        return GetPadding("left");
     }
     int GetPaddingRight()
     {
-        auto v = GetStyle("padding-right");
-        return v.Is<ValueType::Auto>() ? 0 : v.AnyCast<ValueType::Length>().value;
+        return GetPadding("right");
     }
     int GetPaddingTop()
     {
-        auto v = GetStyle("padding-top");
-        return v.Is<ValueType::Auto>() ? 0 : v.AnyCast<ValueType::Length>().value;
+        return GetPadding("top");
     }
     int GetPaddingBottom()
     {
-        auto v = GetStyle("padding-bottom");
-        return v.Is<ValueType::Auto>() ? 0 : v.AnyCast<ValueType::Length>().value;
+        return GetPadding("bottom");
+    }
+
+    int GetMarginLeft()
+    {
+        return GetMargin("left");
+    }
+    int GetMarginRight()
+    {
+        return GetMargin("right");
+    }
+    int GetMarginTop()
+    {
+        return GetMargin("top");
+    }
+    int GetMarginBottom()
+    {
+        return GetMargin("bottom");
     }
 
     void SetX(int x) { this->x = x; }
     void SetY(int y) { this->y = y; }
 
     int GetWidth() { return width; }
-    int GetContentBoxWidth() { return width; }
-    int GetPaddingBoxWidth() { return width + GetPaddingLeft() + GetPaddingRight(); }
-    int GetBorderBoxWidth() { return width + GetPaddingLeft() + GetPaddingRight() + GetBorderWidth(); }
+    int GetContentBoxWidth() { return GetWidth(); }
+    int GetPaddingBoxWidth() { return GetWidth() + GetPaddingLeft() + GetPaddingRight(); }
+    int GetBorderBoxWidth() { return GetWidth() + GetPaddingLeft() + GetPaddingRight() + GetBorderWidth(); }
+    int GetMarginBoxWidth() { return GetWidth() + GetPaddingLeft() + GetPaddingRight() + GetMarginLeft() + GetMarginRight() + GetBorderWidth(); }
+
     void SetWidth(int width) { this->width = width; }
-    void SetContentBoxWidth(int width) { this->width = width; }
-    void SetPaddingBoxWidth(int width) { this->width = width - (GetPaddingLeft() + GetPaddingRight()); }
-    void SetBorderBoxWidth(int width) { this->width = width - (GetPaddingLeft() + GetPaddingRight() + GetBorderWidth()); }
+    void SetContentBoxWidth(int width) { SetWidth(width); }
+    void SetPaddingBoxWidth(int width) { SetWidth(width - (GetPaddingLeft() + GetPaddingRight())); }
+    void SetBorderBoxWidth(int width) { SetWidth(width - (GetPaddingLeft() + GetPaddingRight() + GetBorderWidth())); }
+    void SetMarginBoxWidth(int width) { SetWidth(width - (GetPaddingLeft() + GetPaddingRight() + GetMarginLeft() + GetMarginRight() + GetBorderWidth())); }
 
     int GetHeight() { return height; }
-    int GetContentBoxHeight() { return height; }
-    int GetPaddingBoxHeight() { return height + GetPaddingTop() + GetPaddingBottom(); }
-    int GetBorderBoxHeight() { return height + GetPaddingTop() + GetPaddingBottom() + GetBorderWidth(); }
-    void SetHeight(int height) { this->height = height; }
+    int GetContentBoxHeight() { return GetHeight(); }
+    int GetPaddingBoxHeight() { return GetHeight() + GetPaddingTop() + GetPaddingBottom(); }
+    int GetBorderBoxHeight() { return GetHeight() + GetPaddingTop() + GetPaddingBottom() + GetBorderWidth(); }
+    int GetMarginBoxHeight() { return GetHeight() + GetPaddingTop() + GetPaddingBottom() + GetMarginTop() + GetMarginBottom() + GetBorderWidth(); }
 
-    void SetContentBoxHeight(int height) { this->height = height; }
-    void SetPaddingBoxHeight(int height) { this->height = height - (GetPaddingTop() + GetPaddingBottom()); }
-    void SetBorderBoxHeight(int height) { this->height = height - (GetPaddingTop() + GetPaddingBottom() + GetBorderWidth()); }
+    void SetHeight(int height) { this->height = height; }
+    void SetContentBoxHeight(int height) { SetHeight(height); }
+    void SetPaddingBoxHeight(int height) { SetHeight(height - (GetPaddingTop() + GetPaddingBottom())); }
+    void SetBorderBoxHeight(int height) { SetHeight(height - (GetPaddingTop() + GetPaddingBottom() + GetBorderWidth())); }
+    void SetMarginBoxHeight(int height) { SetHeight(height - (GetPaddingTop() + GetPaddingBottom() + GetMarginTop() + GetMarginBottom() + GetBorderWidth())); }
 
     void Hide() { visiable = false; }
     void Show() { visiable = true; }
@@ -128,11 +182,14 @@ public:
 
     void SetStyle(std::string key, std::string value)
     {
-        style.Set(key, value);
-
         if (transitons.find(key) != transitons.end())
         {
-            transitons[key].Run(*this);
+            style.Set(key, value);
+            transitons[key].Run();
+        }
+        else
+        {
+            style.Set(key, value);
         }
     }
 
@@ -141,10 +198,16 @@ public:
         return style.Get(key);
     }
 
-    void SetOnClickCallback(std::function<EventCallback> cb)
+    void SetCallback(std::string name, std::function<EventCallback> cb)
     {
-        onClickCallback = cb;
+        mapOfCallback[name] = cb;
     }
+
+    bool CheckCallbackExist(std::string name)
+    {
+        return (mapOfCallback.find(name) != mapOfCallback.end());
+    }
+
     void Render(GraphicObject &parent, surface_t *base)
     {
         if (visiable)
@@ -162,22 +225,43 @@ public:
                 //     << "        GetPaddingTop(): " << GetPaddingTop() << ",   "
                 //     << "        item->GetY(): " << item->GetY() << ",   "
                 //     << "\n";
-                item->SetAbsolutePositon(GetAbsoluteX() + GetBorderWidth() + GetPaddingLeft() + item->GetX(), GetAbsoluteY() + GetBorderWidth() + GetPaddingTop() + item->GetY());
+                item->SetAbsolutePositon(GetAbsoluteX() + GetMarginLeft() + GetBorderWidth() + GetPaddingLeft() + item->GetX(), GetAbsoluteY() + GetMarginTop() + GetBorderWidth() + GetPaddingTop() + item->GetY());
                 item->Render(*this, base);
             }
         }
     }
     virtual void OnRender(GraphicObject &parent, surface_t *base)
     {
-        double borderRadius = GetStyle("border-radius").Is<ValueType::Auto>() ? 0 : GetStyle("border-radius").AnyCast<ValueType::Length>().value;
-        double borderWidth = GetStyle("border-width").Is<ValueType::Auto>() ? 0 : GetStyle("border-width").AnyCast<ValueType::Length>().value;
-        ValueType::Color bgColor = GetStyle("background-color").Is<ValueType::Auto>() ? ValueType::Color(0, 0, 0, 0) : GetStyle("background-color").AnyCast<ValueType::Color>();
-        ValueType::Color borderColor = GetStyle("border-color").Is<ValueType::Auto>() ? ValueType::Color(0, 0, 0, 0) : GetStyle("border-color").AnyCast<ValueType::Color>();
+        double borderRadius = GetStyle("border-radius").Is<ValueType::Unset>() ? 0 : GetStyle("border-radius").AnyCast<ValueType::Length>().value;
+        double borderWidth = GetStyle("border-width").Is<ValueType::Unset>() ? 0 : GetStyle("border-width").AnyCast<ValueType::Length>().value;
+        ValueType::Color bgColor = GetStyle("background-color").Is<ValueType::Unset>() ? ValueType::Color(0, 0, 0, 0) : GetStyle("background-color").AnyCast<ValueType::Color>();
+        ValueType::Color borderColor = GetStyle("border-color").Is<ValueType::Unset>() ? ValueType::Color(0, 0, 0, 0) : GetStyle("border-color").AnyCast<ValueType::Color>();
 
-        draw.Set(GetBorderBoxWidth() - GetBorderWidth(), GetBorderBoxHeight() - GetBorderWidth(), GetAbsoluteX() + GetBorderWidth() / 2, GetAbsoluteY() + GetBorderWidth() / 2, Style::ToColorT(bgColor));
+        draw.Set(GetBorderBoxWidth() - GetBorderWidth(), GetBorderBoxHeight() - GetBorderWidth(), GetAbsoluteX() + GetMarginLeft() + GetBorderWidth() / 2, GetAbsoluteY() + GetMarginTop() + GetBorderWidth() / 2, Style::ToColorT(bgColor));
         draw.SetBorder(borderRadius, borderWidth, Style::ToColorT(borderColor));
-
+        if (GetStyle("background-image").Is<std::string>())
+        {
+            draw.SetBgImage(GetStyle("background-image").AnyCast<std::string>(), GetPaddingBoxWidth(), GetPaddingBoxHeight());
+        }
         draw.OnDraw(base);
+
+        if (GetStyle("content").Is<std::string>())
+        {
+            double fontSize = 12;
+            Color color = RGB(0);
+            if (GetStyle("font-size").Is<ValueType::Length>())
+            {
+                fontSize = GetStyle("font-size").AnyCast<ValueType::Length>().value;
+            }
+
+            if (GetStyle("color").Is<ValueType::Color>())
+            {
+                color = Style::ToColorT(GetStyle("color").AnyCast<ValueType::Color>());
+            }
+
+            text.Set(GetContentBoxWidth(), GetContentBoxHeight(), GetAbsoluteX() + GetMarginLeft() + GetBorderWidth(), GetAbsoluteY() + GetMarginTop() + GetBorderWidth(), color, fontSize, GetStyle("content").AnyCast<std::string>());
+            text.OnDraw(base);
+        }
     }
 
     virtual void OnEvent() {}
@@ -185,28 +269,6 @@ public:
     virtual void OnRelease() {}
     virtual void OnPress() {}
     virtual void OnHover() {}
-    virtual void OnClick()
-    {
-        // if (GetStyle("width") != "300")
-        // {
-        //     SetStyle("width", "300");
-        // }
-        // else
-        // {
-        //     SetStyle("width", "100");
-        // }
-
-        // if (GetStyle("height") != "100")
-        // {
-        //     SetStyle("height", "100");
-        // }
-        // else
-        // {
-        //     SetStyle("height", "50");
-        // }
-        if (onClickCallback)
-            onClickCallback(GetSelf());
-    }
 
     void AppendChild(std::shared_ptr<GraphicObject> obj)
     {
@@ -221,10 +283,9 @@ public:
         children.push_back(obj);
     }
 
-    void AddTransiton(Transiton tran)
+    void AddTransiton(std::string property, double duration, double x1, double y1, double x2, double y2, double delay)
     {
-        transitons[tran.property] = tran;
-        transitons[tran.property].Init(GetStyle(tran.property));
+        transitons[property] = Transiton(GetSelf(), property, duration, x1, y1, x2, y2, delay);
     }
 
     virtual void UpdateTranstion()
@@ -234,7 +295,10 @@ public:
             item->UpdateTranstion();
         }
         for (auto &tran : transitons)
-            tran.second.Update(*this);
+        {
+            if (tran.second.state == TransitonState::RUN)
+                tran.second.Update();
+        }
     }
     virtual void EventCapture(EVENT_TYPE type, int x, int y)
     {
@@ -243,6 +307,24 @@ public:
             item->EventCapture(type, x, y);
         }
 
+        if (drag)
+        {
+            if (type == EVENT_TYPE::MOUSE_BTN_UP)
+            {
+                if (CheckCallbackExist("ondragend"))
+                {
+                    mapOfCallback["ondragend"](GetSelf(), std::pair<int, int>(x, y));
+                }
+                drag = false;
+            }
+            else if (type == EVENT_TYPE::MOUSE_MOTION)
+            {
+                if (CheckCallbackExist("ondragover"))
+                {
+                    mapOfCallback["ondragover"](GetSelf(), std::pair<int, int>(x, y));
+                }
+            }
+        }
         if ((x >= GetAbsoluteX() && x < (GetAbsoluteX() + width)) && (y >= GetAbsoluteY() && y < (GetAbsoluteY() + height)))
         {
             OnEvent();
@@ -250,15 +332,31 @@ public:
             if (type == EVENT_TYPE::MOUSE_BTN_UP)
             {
                 OnRelease();
-                OnClick();
+                if (CheckCallbackExist("onclick"))
+                {
+                    mapOfCallback["onclick"](GetSelf(), std::pair<int, int>(x, y));
+                }
+
+                if (CheckCallbackExist("onmouseup"))
+                {
+                    mapOfCallback["onmouseup"](GetSelf(), std::pair<int, int>(x, y));
+                }
             }
             else if (type == EVENT_TYPE::MOUSE_BTN_DOWN)
             {
-                OnPress();
+                if (CheckCallbackExist("onmousedown"))
+                {
+                    mapOfCallback["onmousedown"](GetSelf(), std::pair<int, int>(x, y));
+                }
+                drag = true;
             }
             else if (type == EVENT_TYPE::MOUSE_MOTION)
             {
                 OnFocus();
+                if (CheckCallbackExist("onmousemove"))
+                {
+                    mapOfCallback["onmousemove"](GetSelf(), std::pair<int, int>(x, y));
+                }
             }
         }
     }

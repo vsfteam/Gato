@@ -1,6 +1,8 @@
 #pragma once
 
 #include "color.h"
+#include "surface.h"
+#include "image.h"
 #include "render.h"
 
 #include <string>
@@ -18,6 +20,7 @@ private:
     color_t background_color;
     color_t border_color;
     std::vector<shadow_t> shadows;
+    surface_t *bgImage = NULL;
 
 public:
     DrawRect()
@@ -46,6 +49,14 @@ public:
     {
         shadows = s;
     }
+
+    void SetBgImage(std::string url, int w, int h)
+    {
+        if (bgImage == NULL)
+        {
+            bgImage = surface_image_load(url.c_str(), w - 1, h - 1);
+        }
+    }
     void OnDraw(surface_t *base)
     {
 
@@ -66,6 +77,9 @@ public:
         std::unique_ptr<shadow_t[]> s(new shadow_t[shadows.size()]);
         std::copy(shadows.begin(), shadows.end(), s.get());
         style.shadow = s.get();
+        // style.clip_image = bgImage;
         draw_rectangle(base, x, y, width, height, radius, style);
+        if(bgImage)
+            surface_blit(base, bgImage, x, y);
     }
 };

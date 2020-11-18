@@ -64,11 +64,17 @@ namespace ValueType
     class Length
     {
     public:
-        double value;
+        double value = 0.0f;
         std::string unit;
+        bool isAuto = true;
+        Length() : value(0), unit("px")
+        {
+            isAuto = true;
+        }
 
         Length(double v, std::string u) : value(v), unit(u)
         {
+            isAuto = false;
         }
     };
     class Number
@@ -114,6 +120,15 @@ namespace ValueType
 
     // Some special vlue
     class Auto
+    {
+    };
+    class Initial
+    {
+    };
+    class Inherit
+    {
+    };
+    class Unset
     {
     };
 
@@ -177,12 +192,12 @@ public:
         if (key == "width" || key == "height")
         {
             if (value == "" || value == "auto")
-                v = ValueType::Auto();
+                v = ValueType::Length();
             else if (std::regex_match(value, std::regex("([-+]?[0-9]+)(px)?")))
             {
                 double len = GetLength(value);
                 if (len < 0.0)
-                    v = ValueType::Auto();
+                    v = ValueType::Length();
                 else
                     v = ValueType::Length(len, "px");
             }
@@ -190,12 +205,12 @@ public:
             {
                 double percent = GetPercent(value);
                 if (percent < 0.0)
-                    v = ValueType::Auto();
+                    v = ValueType::Length();
                 else
-                    v = ValueType::Percentage(percent);
+                    v = ValueType::Length(percent, "%");
             }
         }
-        else if (key == "border-radius" || key == "border-width" || key == "padding-left" || key == "padding-right" || key == "padding-top" || key == "padding-bottom")
+        else if (key == "border-radius" || key == "border-width" || key == "padding" || key == "padding-left" || key == "padding-right" || key == "padding-top" || key == "padding-bottom" || key == "margin" || key == "margin-left" || key == "margin-right" || key == "margin-top" || key == "margin-bottom" || key == "font-size")
         {
             if (std::regex_match(value, std::regex("([-+]?[0-9]+)(px)?")))
             {
@@ -208,7 +223,7 @@ public:
         }
         else if (key == "display")
         {
-            if (std::regex_match(value, std::regex("block|inline-block")))
+            if (std::regex_match(value, std::regex("block|inline-block|flex|inline-flex")))
             {
                 v = value;
             }
@@ -220,12 +235,16 @@ public:
                 v = value;
             }
         }
-        else if (key == "background-color" || key == "border-color")
+        else if (key == "background-color" || key == "border-color" || key == "color")
         {
             if (std::regex_match(value, std::regex("#[0-9A-Fa-f]{6,8}")))
             {
                 v = GetColor(value);
             }
+        }
+        else if (key == "content" || key == "background-image")
+        {
+            v = value;
         }
 
         if (v.IsNull())
@@ -243,7 +262,15 @@ public:
         }
         else
         {
-            return ValueType::Auto();
+            if (key == "width" || key == "height")
+            {
+                return ValueType::Length();
+            }
+            else if(key == "display")
+            {
+                return std::string("block");
+            }
+            return ValueType::Unset();
         }
     }
 };

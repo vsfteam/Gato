@@ -8,15 +8,10 @@
 
 class Util
 {
-private:
-    int radius;
-    color_t fill_color;
-    std::mt19937 random;
-
 public:
-    color_t GetRandomColor()
+    static color_t GetRandomColor()
     {
-        std::mt19937 random = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
+        static std::mt19937 random = std::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
         color_t c;
         c.a = 255;
         c.r = random() % 256;
@@ -24,4 +19,5 @@ public:
         c.b = random() % 256;
         return c;
     }
+    static void SetDPIAware();
 };

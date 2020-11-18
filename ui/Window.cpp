@@ -1,5 +1,6 @@
 #include "Window.h"
-#include "BlockLayout.h"
+#include "Layout.h"
+#include "Util.h"
 
 #include <time.h>
 #include <SDL2/SDL.h>
@@ -19,6 +20,8 @@ Window::Window(int width, int height)
     root = std::make_shared<GraphicObject>(StyleList{{"width", std::to_string(width)}, {"height", std::to_string(height)}});
     root->SetWidth(width);
     root->SetHeight(height);
+    Util::SetDPIAware();
+
     SDL_Init(SDL_INIT_VIDEO);
 
     gWindow = SDL_CreateWindow("Gate", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
@@ -62,7 +65,7 @@ void Window::Render(surface_t *base)
     fps[(fps_index++) % 4] = 1000000.0f / mtime;
     float cur_fps = (fps[0] + fps[1] + fps[2] + fps[3]) / 4;
     time = temp;
-    printf("fps:%f\n", cur_fps);
+    // printf("fps:%f\n", cur_fps);
 }
 
 void Window::UpdateWindowSurface()
@@ -87,7 +90,7 @@ void Window::OnExit()
 void Window::MainLoop()
 {
     OnCreate();
-    BlockLayout().Reflow(root);
+    BlockLayout::Reflow(root);
 
     bool running = true;
     while (running)
