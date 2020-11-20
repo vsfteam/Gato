@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "svg.h"
 #include "render.h"
@@ -132,7 +133,7 @@ static double svg_atof(const char *s)
     {
         long expPart = 0;
         cur++;
-        expPart = strtol(cur, &end, 10);
+        expPart = strtoll(cur, &end, 10);
         if (cur != end)
         {
             res *= pow(10.0, (double)expPart);

@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "surface.h"
 #include "render.h"
 #include "svg.h"
