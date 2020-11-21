@@ -17,15 +17,20 @@ static int FilterEvent(void *userdata, SDL_Event *e)
 
 Window::Window(int width, int height)
 {
-    root = std::make_shared<GraphicObject>(StyleList{{"width", std::to_string(width)}, {"height", std::to_string(height)}});
-    root->SetWidth(width);
-    root->SetHeight(height);
     Util::SetDPIAware();
 
     SDL_Init(SDL_INIT_VIDEO);
-
-    gWindow = SDL_CreateWindow("Gate", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+    SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+    gWindow = SDL_CreateWindow("Gate", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
     gSurface = SDL_GetWindowSurface(gWindow);
+
+    width = gSurface->w;
+    height = gSurface->h;
+
+    root = std::make_shared<GraphicObject>(StyleList{{"width", std::to_string(width)}, {"height", std::to_string(height)}});
+    root->SetWidth(width);
+    root->SetHeight(height);
+
     surface_wrap(&surface, (color_t *)gSurface->pixels, width, height);
     clock_gettime(CLOCK_MONOTONIC, &time);
     mutex = SDL_CreateMutex();
@@ -45,6 +50,9 @@ void Window::Resize(int width, int height)
     SDL_LockMutex(mutex);
     SDL_SetWindowSize(gWindow, width, height);
     gSurface = SDL_GetWindowSurface(gWindow);
+
+    width = gSurface->w;
+    height = gSurface->h;
 
     surface_wrap(&surface, (color_t *)gSurface->pixels, width, height);
 
