@@ -234,11 +234,15 @@ public:
     {
         double borderRadius = GetStyle("border-radius").Is<ValueType::Unset>() ? 0 : GetStyle("border-radius").AnyCast<ValueType::Length>().value;
         double borderWidth = GetStyle("border-width").Is<ValueType::Unset>() ? 0 : GetStyle("border-width").AnyCast<ValueType::Length>().value;
+        double blur = GetStyle("backdrop-blur").Is<ValueType::Unset>() ? 0 : GetStyle("backdrop-blur").AnyCast<ValueType::Length>().value;
+
         ValueType::Color bgColor = GetStyle("background-color").Is<ValueType::Unset>() ? ValueType::Color(0, 0, 0, 0) : GetStyle("background-color").AnyCast<ValueType::Color>();
         ValueType::Color borderColor = GetStyle("border-color").Is<ValueType::Unset>() ? ValueType::Color(0, 0, 0, 0) : GetStyle("border-color").AnyCast<ValueType::Color>();
 
         draw.Set(GetBorderBoxWidth() - GetBorderWidth(), GetBorderBoxHeight() - GetBorderWidth(), GetAbsoluteX() + GetMarginLeft() + GetBorderWidth() / 2, GetAbsoluteY() + GetMarginTop() + GetBorderWidth() / 2, Style::ToColorT(bgColor));
         draw.SetBorder(borderRadius, borderWidth, Style::ToColorT(borderColor));
+        draw.SetBlur(blur);
+
         if (GetStyle("background-image").Is<std::string>())
         {
             draw.SetBgImage(GetStyle("background-image").AnyCast<std::string>(), GetPaddingBoxWidth(), GetPaddingBoxHeight());

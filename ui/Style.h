@@ -162,7 +162,7 @@ public:
         if (!std::regex_match(value, m, std::regex("#([0-9A-Fa-f]{6,8})"))) // TODO: 6/8
             assert(0);
 
-        unsigned int c = std::stoi(m.str(1), 0, 16);
+        unsigned long c = std::stoul(m.str(1), 0, 16);
 
         if (value.size() == 7)
             return ValueType::Color(c, c >> 8, c >> 16, 255);
@@ -210,7 +210,7 @@ public:
                     v = ValueType::Length(percent, "%");
             }
         }
-        else if (key == "border-radius" || key == "border-width" || key == "padding" || key == "padding-left" || key == "padding-right" || key == "padding-top" || key == "padding-bottom" || key == "margin" || key == "margin-left" || key == "margin-right" || key == "margin-top" || key == "margin-bottom" || key == "font-size")
+        else if (key == "border-radius" || key == "border-width" || key == "padding" || key == "padding-left" || key == "padding-right" || key == "padding-top" || key == "padding-bottom" || key == "margin" || key == "margin-left" || key == "margin-right" || key == "margin-top" || key == "margin-bottom" || key == "font-size" || key == "backdrop-blur")
         {
             if (std::regex_match(value, std::regex("([-+]?[0-9]+)(px)?")))
             {
@@ -246,7 +246,34 @@ public:
         {
             v = value;
         }
-
+        else if (key == "justify-content")
+        {
+            if (std::regex_match(value, std::regex("flex-start|flex-end|center|space-between|space-around")))
+            {
+                v = value;
+            }
+        }
+        else if (key == "flex-wrap")
+        {
+            if (std::regex_match(value, std::regex("nowrap|wrap|wrap-reverse")))
+            {
+                v = value;
+            }
+        }
+        else if (key == "align-items")
+        {
+            if (std::regex_match(value, std::regex("flex-start|flex-end|center|baseline|stretch")))
+            {
+                v = value;
+            }
+        }
+        else if (key == "align-content")
+        {
+            if (std::regex_match(value, std::regex("flex-start|flex-end|center|space-between|space-around|stretch")))
+            {
+                v = value;
+            }
+        }
         if (v.IsNull())
         {
             assert(0);
@@ -266,9 +293,25 @@ public:
             {
                 return ValueType::Length();
             }
-            else if(key == "display")
+            else if (key == "display")
             {
                 return std::string("block");
+            }
+            else if (key == "justify-content")
+            {
+                return std::string("flex-start");
+            }
+            else if (key == "flex-wrap")
+            {
+                return std::string("nowrap");
+            }
+            else if (key == "align-items")
+            {
+                return std::string("flex-start");
+            }
+            else if (key == "align-content")
+            {
+                return std::string("flex-start");
             }
             return ValueType::Unset();
         }

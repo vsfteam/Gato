@@ -106,10 +106,54 @@ public:
 
         // Case 7:
 
-        auto obj = std::make_shared<GraphicObject>(StyleList{{"width", "auto"}, {"height", "100%"}, {"background-color", "#1682C2"}});
-        auto task_bar = std::make_shared<GraphicObject>(StyleList{{"width", "auto"}, {"height", "30"}, {"background-color", "#10ffffff"}, {"content", "Mon Jun 22 9:41 AM"}, {"font-size", "16"}, {"color", "#ffffff"}});
-        auto body = std::make_shared<GraphicObject>(StyleList{{"width", "auto"}, {"height", std::to_string(502 - 30 - 10)}, {"padding-top", "10"}, {"padding-left", "42"}});
-        auto content = std::make_shared<GraphicObject>(StyleList{{"display", "inline-block"}, {"width", std::to_string(335 + 14)}, {"height", "auto"}, {"background-color", "#3fffffff"}, {"border-radius", "15"}, {"padding", "7"}});
+        auto obj = std::make_shared<GraphicObject>(StyleList{
+            {"width", "auto"},
+            {"height", "100%"},
+            {"background-image", "res/bigsur.png"},
+        });
+        auto task_bar = std::make_shared<GraphicObject>(StyleList{
+            {"display", "flex"},
+            {"height", "30"},
+            {"background-color", "#6061377F"},
+            {"justify-content", "flex-end"},
+            {"align-items", "center"},
+        });
+
+        for (int i = 0; i < 4; i++)
+        {
+            task_bar->AppendChild(
+                {
+                    {"width", "45"},
+                    {"height", "30"},
+                    {"background-color", "#ff0000"},
+                });
+        }
+
+        task_bar->AppendChild(
+            {
+                {"width", "200px"},
+                {"height", "20"},
+                {"background-color", "#ff0000"},
+                {"content", "Mon Jun 22 9:41 AM"},
+                {"font-size", "16"},
+                {"color", "#ffffff"},
+            });
+        auto body = std::make_shared<GraphicObject>(StyleList{
+            {"display", "flex"},
+            {"width", "auto"},
+            {"height", std::to_string(502 - 30 - 10)},
+            {"justify-content", "flex-end"},
+        });
+        auto content = std::make_shared<GraphicObject>(StyleList{
+            {"display", "inline-block"},
+            {"width", std::to_string(335 + 14)},
+            {"height", "auto"},
+            {"background-color", "#3fffffff"},
+            {"border-radius", "15"},
+            {"padding", "7"},
+            {"margin", "14"},
+            {"backdrop-blur", "50px"},
+        });
         task_bar->SetCallback("onclick", [content](std::shared_ptr<GraphicObject> obj, Any e) -> void {
             content->SetVisibility(!content->GetVisibility());
         });
@@ -128,11 +172,10 @@ public:
             {
                 auto item_padding = std::make_shared<GraphicObject>(StyleList{{"height", std::to_string(50 - 14)}, {"padding", "7"}});
                 auto item_icon = std::make_shared<GraphicObject>(StyleList{
-                    {"display", "inline-block"},
+                    {"display", "inline-flex"},
                     {"width", std::to_string(30)},
-                    {"height", std::to_string(50 - 14 - 6)},
-                    {"padding-top", "3"},
-                    {"padding-bottom", "3"},
+                    {"height", std::to_string(50 - 14)},
+                    {"align-content", "center"},
                 });
                 auto item_icon_image = std::make_shared<GraphicObject>(StyleList{
                     {"width", "30"},
@@ -153,11 +196,10 @@ public:
             {
                 auto item_padding = std::make_shared<GraphicObject>(StyleList{{"height", std::to_string(50 - 14)}, {"padding", "7"}});
                 auto item_icon = std::make_shared<GraphicObject>(StyleList{
-                    {"display", "inline-block"},
+                    {"display", "inline-flex"},
                     {"width", std::to_string(30)},
-                    {"height", std::to_string(50 - 14 - 6)},
-                    {"padding-top", "3"},
-                    {"padding-bottom", "3"},
+                    {"height", std::to_string(50 - 14)},
+                    {"align-content", "center"},
                 });
                 auto item_icon_image = std::make_shared<GraphicObject>(StyleList{
                     {"width", "30"},
@@ -179,11 +221,10 @@ public:
             {
                 auto item_padding = std::make_shared<GraphicObject>(StyleList{{"height", std::to_string(50 - 14)}, {"padding", "7"}});
                 auto item_icon = std::make_shared<GraphicObject>(StyleList{
-                    {"display", "inline-block"},
+                    {"display", "inline-flex"},
                     {"width", std::to_string(30)},
-                    {"height", std::to_string(50 - 14 - 6)},
-                    {"padding-top", "3"},
-                    {"padding-bottom", "3"},
+                    {"height", std::to_string(50 - 14)},
+                    {"align-content", "center"},
                 });
                 auto item_icon_image = std::make_shared<GraphicObject>(StyleList{
                     {"width", "30"},
@@ -358,8 +399,16 @@ public:
         }
 
         {
-            auto parent = std::make_shared<GraphicObject>(StyleList{{"display", "inline-block"}, {"padding", "7"}, {"height", "300px"}});
-            for (int i = 0; i < 4; i++)
+            auto parent = std::make_shared<GraphicObject>(StyleList{
+                {"display", "flex"},
+                {"justify-content", "space-around"},
+                {"align-items", "flex-start"},
+                {"padding", "7"},
+                {"height", "auto"},
+                {"flex-wrap", "wrap"},
+                {"align-content", "space-around"},
+            });
+            for (int i = 0; i < 5; i++)
             {
                 auto item = std::make_shared<GraphicObject>(StyleList{
                     {"display", "inline-block"},
@@ -367,6 +416,14 @@ public:
                     {"height", "75"},
                     {"background-color", "#4fffffff"},
                     {"border-radius", "11"},
+                });
+                item->AddTransiton("height", 0.3, 1, .53, .7, 1.51, 1);
+
+                item->SetCallback("onclick", [](std::shared_ptr<GraphicObject> obj, Any e) -> void {
+                    if (obj->GetStyle("height").AnyCast<ValueType::Length>().value == 75)
+                        obj->SetStyle("height", std::to_string(100));
+                    else
+                        obj->SetStyle("height", std::to_string(75));
                 });
                 parent->AppendChild(item);
             }

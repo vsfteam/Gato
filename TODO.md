@@ -1,5 +1,8 @@
 - flex布局
-- 动画
+- display不同，item的auto应有不同的响应
+- transform
+- fliter
+- 弹簧动画
 - border-radius
 - 文本排版
 - 字体渲染
