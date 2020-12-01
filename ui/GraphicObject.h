@@ -225,7 +225,24 @@ public:
                 //     << "        GetPaddingTop(): " << GetPaddingTop() << ",   "
                 //     << "        item->GetY(): " << item->GetY() << ",   "
                 //     << "\n";
-                item->SetAbsolutePositon(GetAbsoluteX() + GetMarginLeft() + GetBorderWidth() + GetPaddingLeft() + item->GetX(), GetAbsoluteY() + GetMarginTop() + GetBorderWidth() + GetPaddingTop() + item->GetY());
+
+                int x = GetAbsoluteX() + GetMarginLeft() + GetBorderWidth() + GetPaddingLeft() + item->GetX();
+                int y = GetAbsoluteY() + GetMarginTop() + GetBorderWidth() + GetPaddingTop() + item->GetY();
+
+                std::string position = GetStyle("position").AnyCast<std::string>();
+
+                if (position == "static")
+                {
+                }
+                else if (position == "relative")
+                {
+                    int left = GetStyle("left").Is<ValueType::Length>() ? GetStyle("left").AnyCast<ValueType::Length>().value : 0;
+                    int top = GetStyle("top").Is<ValueType::Length>() ? GetStyle("top").AnyCast<ValueType::Length>().value : 0;
+                    x += left;
+                    y += top;
+                }
+
+                item->SetAbsolutePositon(x, y);
                 item->Render(*this, base);
             }
         }

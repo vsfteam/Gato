@@ -211,6 +211,7 @@ public:
             }
         }
         else if (key == "border-radius" || key == "border-width" || key == "padding" || key == "padding-left" || key == "padding-right" || key == "padding-top" || key == "padding-bottom" || key == "margin" || key == "margin-left" || key == "margin-right" || key == "margin-top" || key == "margin-bottom" || key == "font-size" || key == "backdrop-blur")
+
         {
             if (std::regex_match(value, std::regex("([-+]?[0-9]+)(px)?")))
             {
@@ -219,6 +220,14 @@ public:
                     v = ValueType::Length(0, "px"); //TODO:
                 else
                     v = ValueType::Length(len, "px");
+            }
+        }
+        else if (key == "left" || key == "top")
+        {
+            if (std::regex_match(value, std::regex("([-+]?[0-9]+)(px)?")))
+            {
+                double len = GetLength(value);
+                v = ValueType::Length(len, "px");
             }
         }
         else if (key == "display")
@@ -274,6 +283,14 @@ public:
                 v = value;
             }
         }
+        else if (key == "position")
+        {
+            if (std::regex_match(value, std::regex("static|absolute|relative|fixed")))
+            {
+                v = value;
+            }
+        }
+
         if (v.IsNull())
         {
             assert(0);
@@ -312,6 +329,10 @@ public:
             else if (key == "align-content")
             {
                 return std::string("flex-start");
+            }
+            else if (key == "position")
+            {
+                return std::string("static");
             }
             return ValueType::Unset();
         }

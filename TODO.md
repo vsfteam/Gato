@@ -1,5 +1,6 @@
 - flex布局
 - display不同，item的auto应有不同的响应
+- position
 - transform
 - fliter
 - 弹簧动画
